@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard Estoque - Vegas</title>
+
+<style>
+
+body{
+margin:0;
+font-family:'Segoe UI',Arial;
+background:radial-gradient(circle at top,#1c1c1c,#000);
+color:#e5e5e5;
+}
+
+header{
+text-align:center;
+padding:20px;
+background:#111;
+box-shadow:0 4px 15px black;
+}
+
+.logo{
+width:180px;
+}
+
+.container{
+max-width:1100px;
+margin:20px auto;
+padding:15px;
+}
+
+.card{
+background:#121212;
+border:1px solid #2a2a2a;
+border-radius:14px;
+padding:15px;
+margin-bottom:15px;
+box-shadow:0 5px 20px rgba(0,0,0,.6);
+}
+
+.nome{
+font-size:18px;
+font-weight:bold;
+}
+
+.status{
+padding:6px 12px;
+border-radius:8px;
+font-weight:bold;
+}
+
+.pendente{background:#444;}
+.separado{background:#777;}
+.entregue{background:#bbb;color:black;}
+
+select{
+margin-top:10px;
+padding:8px;
+border-radius:8px;
+background:#000;
+color:white;
+border:1px solid #444;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<img src="assets/vegaslogo.jpg" class="logo">
+<h2>Dashboard do Estoque</h2>
+</header>
+
+<div class="container" id="lista"></div>
+
+<script>
+
+const URL_SCRIPT="COLE_AQUI_SUA_URL_WEBAPP";
+
+/* ===== CARREGAR SOLICITAÇÕES ===== */
+
+async function carregar(){
+
+const res=await fetch(URL_SCRIPT);
+const dados=await res.json();
+
+const container=document.getElementById("lista");
+container.innerHTML="";
+
+dados.reverse().forEach(item=>{
+
+container.innerHTML+=`
+
+<div class="card">
+
+<div class="nome">${item.nome}</div>
+
+<p><b>CPF:</b> ${item.cpf}</p>
+<p><b>Telefone:</b> ${item.telefone}</p>
+<p><b>Posto:</b> ${item.posto}</p>
+<p><b>Uniformes:</b><br>${item.uniformes}</p>
+<p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
+
+<p>
+<b>Status:</b>
+<span class="status ${item.status.toLowerCase()}">
+${item.status}
+</span>
+</p>
+
+<select onchange="alterar(${item.id},this.value)">
+<option value="">Alterar Status</option>
+<option>PENDENTE</option>
+<option>SEPARADO</option>
+<option>ENTREGUE</option>
+</select>
+
+</div>
+`;
+});
+
+}
+
+/* ===== ALTERAR STATUS ===== */
+
+async function alterar(id,status){
+
+await fetch(URL_SCRIPT+"?func=atualizarStatus&id="+id+"&status="+status);
+
+carregar();
+}
+
+carregar();
+
+</script>
+
+</body>
+</html>
