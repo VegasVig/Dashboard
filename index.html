@@ -4,180 +4,167 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Dashboard - Estoque</title>
+<title>Estoque Vegas</title>
 
 <style>
+
 body{
-    margin:0;
-    font-family:Arial, Helvetica, sans-serif;
-    background:#0f172a;
-    color:white;
+margin:0;
+font-family:'Segoe UI',Arial;
+background:radial-gradient(circle at top,#1c1c1c,#000);
+color:#e5e5e5;
 }
 
-/* TOPO */
 header{
-    background:#020617;
-    padding:15px;
-    display:flex;
-    align-items:center;
-    gap:15px;
-    border-bottom:2px solid #1e293b;
+text-align:center;
+padding:20px;
+background:#111;
+box-shadow:0 4px 15px black;
 }
 
-header img{
-    height:50px;
+.logo{
+width:180px;
 }
 
-header h1{
-    font-size:22px;
-    margin:0;
-}
-
-/* CONTAINER */
 .container{
-    padding:20px;
+max-width:1100px;
+margin:20px auto;
+padding:15px;
 }
 
-/* TABELA */
-table{
-    width:100%;
-    border-collapse:collapse;
-    background:#020617;
-    border-radius:10px;
-    overflow:hidden;
+.card{
+background:#121212;
+border:1px solid #2a2a2a;
+border-radius:14px;
+padding:15px;
+margin-bottom:15px;
+box-shadow:0 5px 20px rgba(0,0,0,.6);
 }
 
-th{
-    background:#1e293b;
-    padding:12px;
-    text-align:left;
+.nome{
+font-size:18px;
+font-weight:bold;
+margin-bottom:10px;
 }
 
-td{
-    padding:10px;
-    border-bottom:1px solid #1e293b;
-}
-
-tr:hover{
-    background:#0f172a;
-}
-
-/* STATUS */
 .status{
-    padding:5px 10px;
-    border-radius:6px;
-    font-weight:bold;
+padding:6px 12px;
+border-radius:8px;
+font-weight:bold;
 }
 
-.entregue{
-    background:#16a34a;
+.pendente{background:#444;}
+.separado{background:#777;}
+.entregue{background:#bbb;color:black;}
+
+select{
+margin-top:10px;
+padding:8px;
+border-radius:8px;
+background:#000;
+color:white;
+border:1px solid #444;
 }
 
-.pendente{
-    background:#f59e0b;
-}
-
-/* ASSINATURA */
 .assinatura{
-    width:120px;
-    border-radius:6px;
-    background:white;
+margin-top:10px;
+background:white;
+border-radius:8px;
+max-width:220px;
 }
+
 </style>
 </head>
 
 <body>
 
 <header>
-    <!-- TROQUE PELO SEU LOGO -->
-    <img src="LOGO_AQUI.png">
-    <h1>Controle de Estoque</h1>
+<!-- SE A LOGO NÃO APARECER, coloque a imagem na mesma pasta -->
+<img src="assets/vegaslogo.jpg" class="logo">
+<h2>Dashboard do Estoque</h2>
 </header>
 
-<div class="container">
-
-<table>
-<thead>
-<tr>
-    <th>Data</th>
-    <th>Nome</th>
-    <th>CPF</th>
-    <th>Telefone</th>
-    <th>Posto</th>
-    <th>Uniformes</th>
-    <th>Status</th>
-    <th>Assinatura</th>
-</tr>
-</thead>
-
-<tbody id="tabela"></tbody>
-
-</table>
-
-</div>
+<div class="container" id="lista"></div>
 
 <script>
 
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwIPsU0ef84l2J-G3WPaASZ7fhAyj72dg7dN08tQYGn7YP7t2YcU39jbzGWoedwQYgMTw/exec";
+const URL_SCRIPT="COLE_AQUI_SUA_URL_DO_APPS_SCRIPT";
 
-/* ===========================
-   CARREGAR DADOS
-=========================== */
-async function carregarDados(){
+/* ================= CARREGAR ================= */
 
-    const resposta = await fetch(URL_SCRIPT);
-    const dados = await resposta.json();
+async function carregar(){
 
-    const tabela = document.getElementById("tabela");
-    tabela.innerHTML = "";
+const res = await fetch(URL_SCRIPT);
+const dados = await res.json();
 
-    dados.reverse().forEach(item => {
+const container=document.getElementById("lista");
+container.innerHTML="";
 
-        const tr = document.createElement("tr");
+dados.reverse().forEach(item=>{
 
-        /* STATUS */
-        let classeStatus = "pendente";
-        if(item.status && item.status.toLowerCase() === "entregue"){
-            classeStatus = "entregue";
-        }
+let assinaturaHTML="Pendente";
 
-        /* ASSINATURA */
-        let assinaturaHTML = "Pendente";
-
-        if(
-            item.assinatura &&
-            item.assinatura !== "" &&
-            item.assinatura !== "Pendente" &&
-            item.assinatura.startsWith("data:image")
-        ){
-            assinaturaHTML =
-                `<img src="${item.assinatura}" class="assinatura">`;
-        }
-
-        tr.innerHTML = `
-            <td>${item.data || ""}</td>
-            <td>${item.nome || ""}</td>
-            <td>${item.cpf || ""}</td>
-            <td>${item.telefone || ""}</td>
-            <td>${item.posto || ""}</td>
-            <td>${item.uniformes || ""}</td>
-            <td>
-                <span class="status ${classeStatus}">
-                    ${item.status || "Pendente"}
-                </span>
-            </td>
-            <td>${assinaturaHTML}</td>
-        `;
-
-        tabela.appendChild(tr);
-    });
+if(item.assinatura && item.assinatura.includes("data:image")){
+assinaturaHTML=`<img src="${item.assinatura}" class="assinatura">`;
 }
 
-/* carregar automático */
-carregarDados();
+container.innerHTML+=`
 
-/* atualizar sozinho a cada 10s */
-setInterval(carregarDados,10000);
+<div class="card">
+
+<div class="nome">${item.nome}</div>
+
+<p><b>CPF:</b> ${item.cpf}</p>
+<p><b>Telefone:</b> ${item.telefone}</p>
+<p><b>Posto:</b> ${item.posto}</p>
+
+<p><b>Uniformes:</b><br>${item.uniformes}</p>
+
+<p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
+
+<p>
+<b>Status:</b>
+<span class="status ${(item.status || "pendente").toLowerCase()}">
+${item.status || "PENDENTE"}
+</span>
+</p>
+
+<select onchange="alterar(${item.id},this.value)">
+<option value="">Alterar Status</option>
+<option>PENDENTE</option>
+<option>SEPARADO</option>
+<option>ENTREGUE</option>
+</select>
+
+<p><b>Assinatura:</b><br>${assinaturaHTML}</p>
+
+</div>
+`;
+});
+
+}
+
+/* ================= ALTERAR STATUS ================= */
+
+async function alterar(id,status){
+
+if(!status) return;
+
+await fetch(
+URL_SCRIPT +
+"?func=atualizarStatus" +
+"&id=" + id +
+"&status=" + status
+);
+
+carregar();
+}
+
+/* carregar inicial */
+carregar();
+
+/* auto atualizar a cada 10s */
+setInterval(carregar,10000);
 
 </script>
 
