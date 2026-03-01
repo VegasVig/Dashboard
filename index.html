@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Estoque Uniformes Vegas</title>
+<title>Estoque Vegas</title>
 
 <style>
 
@@ -28,46 +28,9 @@ width:180px;
 
 .container{
 max-width:1100px;
-margin:auto;
+margin:20px auto;
 padding:15px;
 }
-
-/* FILTROS */
-.filtros{
-display:flex;
-flex-wrap:wrap;
-gap:10px;
-justify-content:center;
-margin:15px;
-}
-
-input,select{
-padding:10px;
-border-radius:8px;
-border:1px solid #444;
-background:#000;
-color:white;
-}
-
-/* CONTADORES */
-
-.stats{
-display:flex;
-justify-content:center;
-gap:15px;
-flex-wrap:wrap;
-margin-bottom:15px;
-}
-
-.stat{
-background:#121212;
-border:1px solid #2a2a2a;
-padding:10px 20px;
-border-radius:10px;
-font-weight:bold;
-}
-
-/* CARD */
 
 .card{
 background:#121212;
@@ -81,6 +44,7 @@ box-shadow:0 5px 20px rgba(0,0,0,.6);
 .nome{
 font-size:18px;
 font-weight:bold;
+margin-bottom:10px;
 }
 
 .status{
@@ -93,11 +57,20 @@ font-weight:bold;
 .separado{background:#777;}
 .entregue{background:#bbb;color:black;}
 
-.assinatura{
-background:white;
-border-radius:10px;
+select{
 margin-top:10px;
-max-width:260px;
+padding:8px;
+border-radius:8px;
+background:#000;
+color:white;
+border:1px solid #444;
+}
+
+.assinatura{
+margin-top:10px;
+background:white;
+border-radius:8px;
+max-width:220px;
 }
 
 </style>
@@ -106,78 +79,34 @@ max-width:260px;
 <body>
 
 <header>
+<!-- SE A LOGO NÃO APARECER, coloque a imagem na mesma pasta -->
 <img src="assets/vegaslogo.jpg" class="logo">
 <h2>Dashboard do Estoque</h2>
 </header>
-
-<div class="filtros">
-<input id="buscaCPF" placeholder="Buscar CPF">
-<select id="filtroStatus">
-<option value="">Todos Status</option>
-<option>PENDENTE</option>
-<option>SEPARADO</option>
-<option>ENTREGUE</option>
-</select>
-</div>
-
-<div class="stats">
-<div class="stat" id="total">Total: 0</div>
-<div class="stat" id="pendentes">Pendentes: 0</div>
-<div class="stat" id="separados">Separados: 0</div>
-<div class="stat" id="entregues">Entregues: 0</div>
-</div>
 
 <div class="container" id="lista"></div>
 
 <script>
 
-/* ⚠️ COLE SUA URL DO WEB APP */
 const URL_SCRIPT="https://script.google.com/macros/s/AKfycbwIPsU0ef84l2J-G3WPaASZ7fhAyj72dg7dN08tQYGn7YP7t2YcU39jbzGWoedwQYgMTw";
 
-let dadosGlobais=[];
-
-/* ===== BUSCAR GOOGLE SHEETS ===== */
+/* ================= CARREGAR ================= */
 
 async function carregar(){
 
-try{
-
 const res = await fetch(URL_SCRIPT);
-dadosGlobais = await res.json();
-
-/* ORDEM MAIS RECENTE PRIMEIRO */
-dadosGlobais.sort((a,b)=> b.id - a.id);
-
-renderizar();
-
-}catch(e){
-console.log("Erro ao buscar dados:",e);
-}
-
-}
-
-/* ===== RENDER ===== */
-
-function renderizar(){
-
-const cpfBusca=document.getElementById("buscaCPF").value;
-const statusFiltro=document.getElementById("filtroStatus").value;
+const dados = await res.json();
 
 const container=document.getElementById("lista");
 container.innerHTML="";
 
-let total=0,pend=0,sep=0,ent=0;
+dados.reverse().forEach(item=>{
 
-dadosGlobais.forEach(item=>{
+let assinaturaHTML="Pendente";
 
-if(cpfBusca && !item.cpf.includes(cpfBusca)) return;
-if(statusFiltro && item.status!==statusFiltro) return;
-
-total++;
-
-if(item.status==="PENDENTE") pend++;
-if(item.status==="SEPARADO") sep++;
-if(item.status==="ENTREGUE") ent++;
+if(item.assinatura && item.assinatura.includes("data:image")){
+assinaturaHTML=`<img src="${item.assinatura}" class="assinatura">`;
+}
 
 container.innerHTML+=`
 
@@ -193,15 +122,10 @@ container.innerHTML+=`
 
 <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
 
-${item.assinatura ? `
-<p><b>Assinatura:</b></p>
-<img src="${item.assinatura}" class="assinatura">
-`:""}
-
 <p>
 <b>Status:</b>
-<span class="status ${item.status.toLowerCase()}">
-${item.status}
+<span class="status ${(item.status || "pendente").toLowerCase()}">
+${item.status || "PENDENTE"}
 </span>
 </p>
 
@@ -212,38 +136,35 @@ ${item.status}
 <option>ENTREGUE</option>
 </select>
 
+<p><b>Assinatura:</b><br>${assinaturaHTML}</p>
+
 </div>
 `;
-
 });
-
-/* CONTADORES */
-document.getElementById("total").innerText="Total: "+total;
-document.getElementById("pendentes").innerText="Pendentes: "+pend;
-document.getElementById("separados").innerText="Separados: "+sep;
-document.getElementById("entregues").innerText="Entregues: "+ent;
 
 }
 
-/* ===== ALTERAR STATUS ===== */
+/* ================= ALTERAR STATUS ================= */
 
 async function alterar(id,status){
 
 if(!status) return;
 
-await fetch(`${URL_SCRIPT}?func=atualizarStatus&id=${id}&status=${status}`);
+await fetch(
+URL_SCRIPT +
+"?func=atualizarStatus" +
+"&id=" + id +
+"&status=" + status
+);
 
 carregar();
 }
 
-/* FILTROS */
-buscaCPF.oninput=renderizar;
-filtroStatus.onchange=renderizar;
-
-/* AUTO UPDATE */
-setInterval(carregar,15000);
-
+/* carregar inicial */
 carregar();
+
+/* auto atualizar a cada 10s */
+setInterval(carregar,10000);
 
 </script>
 
