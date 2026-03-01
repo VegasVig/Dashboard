@@ -116,6 +116,12 @@ appearance:none;
 -webkit-appearance:none;
 position:relative;
 }
+.linhaData{
+width:100%;
+display:flex;
+flex-direction:column;
+align-items:center;
+}
 
 /* ícone calendário branco */
 input[type="date"]::-webkit-calendar-picker-indicator{
@@ -135,15 +141,21 @@ cursor:pointer;
 
 <!-- FILTROS -->
 <div class="filtros">
+
 <input type="text" id="buscaCPF" placeholder="Buscar CPF">
-<h3 class="data">DATA </h3>
+
+<div class="linhaData">
+<h3>DATA</h3>
 <input type="date" id="buscaData">
+</div>
+
 <select id="filtroStatus">
 <option value="">Todos Status</option>
 <option value="PENDENTE">PENDENTE</option>
 <option value="SEPARADO">SEPARADO</option>
 <option value="ENTREGUE">ENTREGUE</option>
 </select>
+
 </div>
 
 <!-- CONTADORES -->
