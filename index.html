@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Estoque Vegas</title>
+<title>Estoque Uniformes Vegas</title>
 
 <style>
 
@@ -15,8 +15,6 @@ background:radial-gradient(circle at top,#1c1c1c,#000);
 color:#e5e5e5;
 }
 
-/* ===== HEADER ===== */
-
 header{
 text-align:center;
 padding:20px;
@@ -26,17 +24,21 @@ box-shadow:0 4px 15px black;
 
 .logo{
 width:180px;
-margin-bottom:10px;
 }
 
-/* ===== FILTROS ===== */
+.container{
+max-width:1100px;
+margin:auto;
+padding:15px;
+}
 
+/* FILTROS */
 .filtros{
 display:flex;
 flex-wrap:wrap;
 gap:10px;
 justify-content:center;
-padding:15px;
+margin:15px;
 }
 
 input,select{
@@ -47,14 +49,14 @@ background:#000;
 color:white;
 }
 
-/* ===== CONTADORES ===== */
+/* CONTADORES */
 
 .stats{
 display:flex;
 justify-content:center;
 gap:15px;
 flex-wrap:wrap;
-margin-bottom:10px;
+margin-bottom:15px;
 }
 
 .stat{
@@ -65,13 +67,7 @@ border-radius:10px;
 font-weight:bold;
 }
 
-/* ===== CARDS ===== */
-
-.container{
-max-width:1100px;
-margin:auto;
-padding:15px;
-}
+/* CARD */
 
 .card{
 background:#121212;
@@ -85,7 +81,6 @@ box-shadow:0 5px 20px rgba(0,0,0,.6);
 .nome{
 font-size:18px;
 font-weight:bold;
-margin-bottom:10px;
 }
 
 .status{
@@ -99,15 +94,10 @@ font-weight:bold;
 .entregue{background:#bbb;color:black;}
 
 .assinatura{
-margin-top:10px;
 background:white;
 border-radius:10px;
-max-width:260px;
-}
-
-select.statusSelect{
 margin-top:10px;
-width:220px;
+max-width:260px;
 }
 
 </style>
@@ -120,19 +110,16 @@ width:220px;
 <h2>Dashboard do Estoque</h2>
 </header>
 
-<!-- FILTROS -->
 <div class="filtros">
-<input type="text" id="buscaCPF" placeholder="Buscar CPF">
-<input type="date" id="buscaData">
+<input id="buscaCPF" placeholder="Buscar CPF">
 <select id="filtroStatus">
 <option value="">Todos Status</option>
-<option value="PENDENTE">PENDENTE</option>
-<option value="SEPARADO">SEPARADO</option>
-<option value="ENTREGUE">ENTREGUE</option>
+<option>PENDENTE</option>
+<option>SEPARADO</option>
+<option>ENTREGUE</option>
 </select>
 </div>
 
-<!-- CONTADORES -->
 <div class="stats">
 <div class="stat" id="total">Total: 0</div>
 <div class="stat" id="pendentes">Pendentes: 0</div>
@@ -144,18 +131,29 @@ width:220px;
 
 <script>
 
+/* ⚠️ COLE SUA URL DO WEB APP */
 const URL_SCRIPT="https://script.google.com/macros/s/AKfycbwIPsU0ef84l2J-G3WPaASZ7fhAyj72dg7dN08tQYGn7YP7t2YcU39jbzGWoedwQYgMTw";
 
 let dadosGlobais=[];
 
-/* ===== CARREGAR ===== */
+/* ===== BUSCAR GOOGLE SHEETS ===== */
 
 async function carregar(){
 
-const res=await fetch(URL_SCRIPT);
-dadosGlobais=await res.json();
+try{
+
+const res = await fetch(URL_SCRIPT);
+dadosGlobais = await res.json();
+
+/* ORDEM MAIS RECENTE PRIMEIRO */
+dadosGlobais.sort((a,b)=> b.id - a.id);
 
 renderizar();
+
+}catch(e){
+console.log("Erro ao buscar dados:",e);
+}
+
 }
 
 /* ===== RENDER ===== */
@@ -163,7 +161,6 @@ renderizar();
 function renderizar(){
 
 const cpfBusca=document.getElementById("buscaCPF").value;
-const dataBusca=document.getElementById("buscaData").value;
 const statusFiltro=document.getElementById("filtroStatus").value;
 
 const container=document.getElementById("lista");
@@ -171,13 +168,10 @@ container.innerHTML="";
 
 let total=0,pend=0,sep=0,ent=0;
 
-dadosGlobais.reverse().forEach(item=>{
+dadosGlobais.forEach(item=>{
 
 if(cpfBusca && !item.cpf.includes(cpfBusca)) return;
-
 if(statusFiltro && item.status!==statusFiltro) return;
-
-if(dataBusca && !item.data.includes(dataBusca.split("-").reverse().join("/"))) return;
 
 total++;
 
@@ -202,7 +196,7 @@ container.innerHTML+=`
 ${item.assinatura ? `
 <p><b>Assinatura:</b></p>
 <img src="${item.assinatura}" class="assinatura">
-` : ""}
+`:""}
 
 <p>
 <b>Status:</b>
@@ -211,8 +205,7 @@ ${item.status}
 </span>
 </p>
 
-<select class="statusSelect"
-onchange="alterar(${item.id},this.value)">
+<select onchange="alterar(${item.id},this.value)">
 <option value="">Alterar Status</option>
 <option>PENDENTE</option>
 <option>SEPARADO</option>
@@ -221,6 +214,7 @@ onchange="alterar(${item.id},this.value)">
 
 </div>
 `;
+
 });
 
 /* CONTADORES */
@@ -242,13 +236,11 @@ await fetch(`${URL_SCRIPT}?func=atualizarStatus&id=${id}&status=${status}`);
 carregar();
 }
 
-/* ===== EVENTOS FILTRO ===== */
+/* FILTROS */
+buscaCPF.oninput=renderizar;
+filtroStatus.onchange=renderizar;
 
-document.getElementById("buscaCPF").oninput=renderizar;
-document.getElementById("buscaData").onchange=renderizar;
-document.getElementById("filtroStatus").onchange=renderizar;
-
-/* AUTO REFRESH */
+/* AUTO UPDATE */
 setInterval(carregar,15000);
 
 carregar();
