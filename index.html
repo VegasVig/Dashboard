@@ -6,6 +6,8 @@
 
 <title>UNIFORMES Vegas</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 
 body{
@@ -14,8 +16,6 @@ font-family:'Segoe UI',Arial;
 background:radial-gradient(circle at top,#1c1c1c,#000);
 color:#e5e5e5;
 }
-
-/* ===== HEADER ===== */
 
 header{
 text-align:center;
@@ -28,8 +28,6 @@ box-shadow:0 4px 15px black;
 width:180px;
 margin-bottom:10px;
 }
-
-/* ===== FILTROS ===== */
 
 .filtros{
 display:flex;
@@ -47,8 +45,6 @@ background:#000;
 color:white;
 }
 
-/* ===== CONTADORES ===== */
-
 .stats{
 display:flex;
 justify-content:center;
@@ -65,7 +61,14 @@ border-radius:10px;
 font-weight:bold;
 }
 
-/* ===== CARDS ===== */
+.graficoBox{
+max-width:350px;
+margin:20px auto;
+background:#121212;
+padding:15px;
+border-radius:12px;
+border:1px solid #2a2a2a;
+}
 
 .container{
 max-width:1100px;
@@ -109,13 +112,7 @@ select.statusSelect{
 margin-top:10px;
 width:220px;
 }
-input[type="date"]{
-color:#e5e5e5;
-background:#000;
-appearance:none;
--webkit-appearance:none;
-position:relative;
-}
+
 .linhaData{
 width:100%;
 display:flex;
@@ -123,11 +120,6 @@ flex-direction:column;
 align-items:center;
 }
 
-/* ícone calendário branco */
-input[type="date"]::-webkit-calendar-picker-indicator{
-filter:invert(1);
-cursor:pointer;
-}
 .dataPedido{
 color:#9ca3af;
 font-size:14px;
@@ -144,7 +136,6 @@ margin-bottom:8px;
 <h2>UNIFORMES VEGAS VIGILANCIA</h2>
 </header>
 
-<!-- FILTROS -->
 <div class="filtros">
 
 <input type="text" id="buscaCPF" placeholder="Buscar CPF">
@@ -163,12 +154,15 @@ margin-bottom:8px;
 
 </div>
 
-<!-- CONTADORES -->
 <div class="stats">
 <div class="stat" id="total">Total: 0</div>
 <div class="stat" id="pendentes">Pendentes: 0</div>
 <div class="stat" id="separados">Separados: 0</div>
 <div class="stat" id="entregues">Entregues: 0</div>
+</div>
+
+<div class="graficoBox">
+<canvas id="graficoStatus"></canvas>
 </div>
 
 <div class="container" id="lista"></div>
@@ -178,6 +172,7 @@ margin-bottom:8px;
 const URL_SCRIPT="https://script.google.com/macros/s/AKfycbzmIzhrbJtXHodZK8JBipv_BCVnTwA2cBA0MVDgZwH_qrWKJ0vIQTAIEwmmyGCsapyqYg/exec";
 
 let dadosGlobais=[];
+let grafico;
 
 /* ===== CARREGAR ===== */
 
@@ -187,14 +182,17 @@ const res=await fetch(URL_SCRIPT);
 dadosGlobais=await res.json();
 
 renderizar();
+
 }
+
+/* ===== FORMATAR DATA ===== */
+
 function formatarData(dataBruta){
 
 if(!dataBruta) return "";
 
 try{
 
-// quando vem como texto do Sheets
 const data = new Date(dataBruta);
 
 return data.toLocaleString("pt-BR",{
@@ -210,6 +208,7 @@ return dataBruta;
 }
 
 }
+
 /* ===== RENDER ===== */
 
 function renderizar(){
@@ -223,7 +222,7 @@ container.innerHTML="";
 
 let total=0,pend=0,sep=0,ent=0;
 
-dadosGlobais.reverse().forEach(item=>{
+dadosGlobais.slice().reverse().forEach(item=>{
 
 if(cpfBusca && !item.cpf.includes(cpfBusca)) return;
 
@@ -242,7 +241,11 @@ container.innerHTML+=`
 <div class="card">
 
 <div class="nome">${item.nome}</div>
-<p><b>Data do Pedido:</b> ${formatarData(item.data)}</p>
+
+<p class="dataPedido">
+<b>Data do Pedido:</b> ${formatarData(item.data)}
+</p>
+
 <p><b>CPF:</b> ${item.cpf}</p>
 <p><b>Telefone:</b> ${item.telefone}</p>
 <p><b>Posto:</b> ${item.posto}</p>
@@ -273,13 +276,51 @@ onchange="alterar(${item.id},this.value)">
 
 </div>
 `;
+
 });
 
 /* CONTADORES */
+
 document.getElementById("total").innerText="Total: "+total;
 document.getElementById("pendentes").innerText="Pendentes: "+pend;
 document.getElementById("separados").innerText="Separados: "+sep;
 document.getElementById("entregues").innerText="Entregues: "+ent;
+
+/* ===== ATUALIZA GRAFICO ===== */
+
+atualizarGrafico(pend,sep,ent);
+
+}
+
+/* ===== GRAFICO ===== */
+
+function atualizarGrafico(pend,sep,ent){
+
+const ctx=document.getElementById("graficoStatus");
+
+if(grafico) grafico.destroy();
+
+grafico=new Chart(ctx,{
+type:"pie",
+data:{
+labels:["Pendentes","Separados","Entregues"],
+datasets:[{
+data:[pend,sep,ent],
+backgroundColor:[
+"#facc15",
+"#3b82f6",
+"#22c55e"
+]
+}]
+},
+options:{
+plugins:{
+legend:{
+labels:{color:"white"}
+}
+}
+}
+});
 
 }
 
@@ -292,15 +333,17 @@ if(!status) return;
 await fetch(`${URL_SCRIPT}?func=atualizarStatus&id=${id}&status=${status}`);
 
 carregar();
+
 }
 
-/* ===== EVENTOS FILTRO ===== */
+/* ===== EVENTOS ===== */
 
 document.getElementById("buscaCPF").oninput=renderizar;
 document.getElementById("buscaData").onchange=renderizar;
 document.getElementById("filtroStatus").onchange=renderizar;
 
 /* AUTO REFRESH */
+
 setInterval(carregar,15000);
 
 carregar();
