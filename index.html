@@ -3,352 +3,271 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>UNIFORMES Vegas</title>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+    body{
+        margin:0;
+        font-family:'Segoe UI',Arial;
+        background:radial-gradient(circle at top,#1c1c1c,#000);
+        color:#e5e5e5;
+    }
+    header{
+        text-align:center;
+        padding:20px;
+        background:#111;
+        box-shadow:0 4px 15px black;
+    }
+    .logo{
+        width:180px;
+        margin-bottom:10px;
+    }
+    .filtros{
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+        justify-content:center;
+        padding:15px;
+    }
+    input,select{
+        padding:10px;
+        border-radius:8px;
+        border:1px solid #444;
+        background:#000;
+        color:white;
+        min-width: 180px;
+    }
+    .stats{
+        display:flex;
+        justify-content:center;
+        gap:15px;
+        flex-wrap:wrap;
+        margin-bottom:10px;
+    }
+    .stat{
+        background:#121212;
+        border:1px solid #2a2a2a;
+        padding:10px 20px;
+        border-radius:10px;
+        font-weight:bold;
+    }
+    .graficoBox{
+        max-width:350px;
+        margin:20px auto;
+        background:#121212;
+        padding:15px;
+        border-radius:12px;
+        border:1px solid #2a2a2a;
+    }
+    .container{
+        max-width:1100px;
+        margin:auto;
+        padding:15px;
+    }
+    .card{
+        background:#121212;
+        border:1px solid #2a2a2a;
+        border-radius:14px;
+        padding:15px;
+        margin-bottom:15px;
+        box-shadow:0 5px 20px rgba(0,0,0,.6);
+    }
+    .nome{
+        font-size:18px;
+        font-weight:bold;
+        margin-bottom:10px;
+        color: #fff;
+    }
+    .status{
+        padding:6px 12px;
+        border-radius:8px;
+        font-weight:bold;
+    }
+    .pendente{background:#facc15; color: #000;}
+    .separado{background:#3b82f6;}
+    .entregue{background:#22c55e;color:black;}
 
-body{
-margin:0;
-font-family:'Segoe UI',Arial;
-background:radial-gradient(circle at top,#1c1c1c,#000);
-color:#e5e5e5;
-}
-
-header{
-text-align:center;
-padding:20px;
-background:#111;
-box-shadow:0 4px 15px black;
-}
-
-.logo{
-width:180px;
-margin-bottom:10px;
-}
-
-.filtros{
-display:flex;
-flex-wrap:wrap;
-gap:10px;
-justify-content:center;
-padding:15px;
-}
-
-input,select{
-padding:10px;
-border-radius:8px;
-border:1px solid #444;
-background:#000;
-color:white;
-}
-
-.stats{
-display:flex;
-justify-content:center;
-gap:15px;
-flex-wrap:wrap;
-margin-bottom:10px;
-}
-
-.stat{
-background:#121212;
-border:1px solid #2a2a2a;
-padding:10px 20px;
-border-radius:10px;
-font-weight:bold;
-}
-
-.graficoBox{
-max-width:350px;
-margin:20px auto;
-background:#121212;
-padding:15px;
-border-radius:12px;
-border:1px solid #2a2a2a;
-}
-
-.container{
-max-width:1100px;
-margin:auto;
-padding:15px;
-}
-
-.card{
-background:#121212;
-border:1px solid #2a2a2a;
-border-radius:14px;
-padding:15px;
-margin-bottom:15px;
-box-shadow:0 5px 20px rgba(0,0,0,.6);
-}
-
-.nome{
-font-size:18px;
-font-weight:bold;
-margin-bottom:10px;
-}
-
-.status{
-padding:6px 12px;
-border-radius:8px;
-font-weight:bold;
-}
-
-.pendente{background:#444;}
-.separado{background:#777;}
-.entregue{background:#bbb;color:black;}
-
-.assinatura{
-margin-top:10px;
-background:white;
-border-radius:10px;
-max-width:260px;
-}
-
-select.statusSelect{
-margin-top:10px;
-width:220px;
-}
-
-.linhaData{
-width:100%;
-display:flex;
-flex-direction:column;
-align-items:center;
-}
-
-.dataPedido{
-color:#9ca3af;
-font-size:14px;
-margin-bottom:8px;
-}
-
+    .assinatura{
+        margin-top:10px;
+        background:white;
+        border-radius:10px;
+        max-width:260px;
+    }
+    select.statusSelect{
+        margin-top:10px;
+        width:220px;
+    }
+    .linhaData{
+        width:100%;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+    }
+    .dataPedido{
+        color:#9ca3af;
+        font-size:14px;
+        margin-bottom:8px;
+    }
 </style>
 </head>
 
 <body>
 
 <header>
-<img src="assets/vegaslogo.jpg" class="logo">
-<h2>UNIFORMES VEGAS VIGILANCIA</h2>
+    <img src="assets/vegaslogo.jpg" class="logo">
+    <h2>UNIFORMES VEGAS VIGILÂNCIA</h2>
 </header>
 
 <div class="filtros">
+    <input type="text" id="buscaNome" placeholder="Buscar por Nome">
+    <input type="text" id="buscaPosto" placeholder="Buscar por Posto">
+    <input type="text" id="buscaCPF" placeholder="Buscar CPF">
 
-<input type="text" id="buscaCPF" placeholder="Buscar CPF">
+    <select id="filtroStatus">
+        <option value="">Todos Status</option>
+        <option value="PENDENTE">PENDENTE</option>
+        <option value="SEPARADO">SEPARADO</option>
+        <option value="ENTREGUE">ENTREGUE</option>
+    </select>
 
-<div class="linhaData">
-<h3>DATA</h3>
-<input type="date" id="buscaData">
-</div>
-
-<select id="filtroStatus">
-<option value="">Todos Status</option>
-<option value="PENDENTE">PENDENTE</option>
-<option value="SEPARADO">SEPARADO</option>
-<option value="ENTREGUE">ENTREGUE</option>
-</select>
-
+    <div class="linhaData">
+        <h3 style="margin: 10px 0 5px 0; font-size: 14px;">FILTRAR POR DATA</h3>
+        <input type="date" id="buscaData">
+    </div>
 </div>
 
 <div class="stats">
-<div class="stat" id="total">Total: 0</div>
-<div class="stat" id="pendentes">Pendentes: 0</div>
-<div class="stat" id="separados">Separados: 0</div>
-<div class="stat" id="entregues">Entregues: 0</div>
+    <div class="stat" id="total">Total: 0</div>
+    <div class="stat" id="pendentes" style="color:#facc15">Pendentes: 0</div>
+    <div class="stat" id="separados" style="color:#3b82f6">Separados: 0</div>
+    <div class="stat" id="entregues" style="color:#22c55e">Entregues: 0</div>
 </div>
 
 <div class="graficoBox">
-<canvas id="graficoStatus"></canvas>
+    <canvas id="graficoStatus"></canvas>
 </div>
 
 <div class="container" id="lista"></div>
 
 <script>
-
 const URL_SCRIPT="https://script.google.com/macros/s/AKfycbzmIzhrbJtXHodZK8JBipv_BCVnTwA2cBA0MVDgZwH_qrWKJ0vIQTAIEwmmyGCsapyqYg/exec";
 
 let dadosGlobais=[];
 let grafico;
 
-/* ===== CARREGAR ===== */
-
 async function carregar(){
-
-const res=await fetch(URL_SCRIPT);
-dadosGlobais=await res.json();
-
-renderizar();
-
+    try {
+        const res=await fetch(URL_SCRIPT);
+        dadosGlobais=await res.json();
+        renderizar();
+    } catch(e) { console.error("Erro ao carregar dados", e); }
 }
-
-/* ===== FORMATAR DATA ===== */
 
 function formatarData(dataBruta){
-
-if(!dataBruta) return "";
-
-try{
-
-const data = new Date(dataBruta);
-
-return data.toLocaleString("pt-BR",{
-day:"2-digit",
-month:"2-digit",
-year:"numeric",
-hour:"2-digit",
-minute:"2-digit"
-});
-
-}catch{
-return dataBruta;
+    if(!dataBruta) return "";
+    try{
+        const data = new Date(dataBruta);
+        return data.toLocaleString("pt-BR",{
+            day:"2-digit", month:"2-digit", year:"numeric",
+            hour:"2-digit", minute:"2-digit"
+        });
+    }catch{ return dataBruta; }
 }
-
-}
-
-/* ===== RENDER ===== */
 
 function renderizar(){
+    // Pegando valores dos novos filtros
+    const nomeBusca = document.getElementById("buscaNome").value.toLowerCase();
+    const postoBusca = document.getElementById("buscaPosto").value.toLowerCase();
+    const cpfBusca = document.getElementById("buscaCPF").value;
+    const dataBusca = document.getElementById("buscaData").value;
+    const statusFiltro = document.getElementById("filtroStatus").value;
 
-const cpfBusca=document.getElementById("buscaCPF").value;
-const dataBusca=document.getElementById("buscaData").value;
-const statusFiltro=document.getElementById("filtroStatus").value;
+    const container=document.getElementById("lista");
+    container.innerHTML="";
 
-const container=document.getElementById("lista");
-container.innerHTML="";
+    let total=0,pend=0,sep=0,ent=0;
 
-let total=0,pend=0,sep=0,ent=0;
+    // Filtra e Renderiza
+    dadosGlobais.slice().reverse().forEach(item=>{
+        
+        // Lógica de Filtros Combinados
+        if(nomeBusca && !item.nome.toLowerCase().includes(nomeBusca)) return;
+        if(postoBusca && !item.posto.toLowerCase().includes(postoPostoBusca)) return; // Caso a chave seja 'posto'
+        if(postoBusca && item.posto && !item.posto.toLowerCase().includes(postoBusca)) return;
+        if(cpfBusca && !item.cpf.includes(cpfBusca)) return;
+        if(statusFiltro && item.status!==statusFiltro) return;
+        if(dataBusca && !item.data.includes(dataBusca.split("-").reverse().join("/"))) return;
 
-dadosGlobais.slice().reverse().forEach(item=>{
+        total++;
+        if(item.status==="PENDENTE") pend++;
+        if(item.status==="SEPARADO") sep++;
+        if(item.status==="ENTREGUE") ent++;
 
-if(cpfBusca && !item.cpf.includes(cpfBusca)) return;
+        container.innerHTML+=`
+        <div class="card">
+            <div class="nome">${item.nome}</div>
+            <p class="dataPedido"><b>Data do Pedido:</b> ${formatarData(item.data)}</p>
+            <p><b>CPF:</b> ${item.cpf}</p>
+            <p><b>Telefone:</b> ${item.telefone}</p>
+            <p><b>Posto:</b> ${item.posto || "Não informado"}</p>
+            <p><b>Uniformes:</b><br>${item.uniformes}</p>
+            <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
+            ${item.assinatura ? `<p><b>Assinatura:</b></p><img src="${item.assinatura}" class="assinatura">` : ""}
+            <p>
+                <b>Status:</b>
+                <span class="status ${item.status.toLowerCase()}">${item.status}</span>
+            </p>
+            <select class="statusSelect" onchange="alterar(${item.id},this.value)">
+                <option value="">Alterar Status</option>
+                <option>PENDENTE</option>
+                <option>SEPARADO</option>
+                <option>ENTREGUE</option>
+            </select>
+        </div>`;
+    });
 
-if(statusFiltro && item.status!==statusFiltro) return;
+    document.getElementById("total").innerText="Total: "+total;
+    document.getElementById("pendentes").innerText="Pendentes: "+pend;
+    document.getElementById("separados").innerText="Separados: "+sep;
+    document.getElementById("entregues").innerText="Entregues: "+ent;
 
-if(dataBusca && !item.data.includes(dataBusca.split("-").reverse().join("/"))) return;
-
-total++;
-
-if(item.status==="PENDENTE") pend++;
-if(item.status==="SEPARADO") sep++;
-if(item.status==="ENTREGUE") ent++;
-
-container.innerHTML+=`
-
-<div class="card">
-
-<div class="nome">${item.nome}</div>
-
-<p class="dataPedido">
-<b>Data do Pedido:</b> ${formatarData(item.data)}
-</p>
-
-<p><b>CPF:</b> ${item.cpf}</p>
-<p><b>Telefone:</b> ${item.telefone}</p>
-<p><b>Posto:</b> ${item.posto}</p>
-
-<p><b>Uniformes:</b><br>${item.uniformes}</p>
-
-<p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
-
-${item.assinatura ? `
-<p><b>Assinatura:</b></p>
-<img src="${item.assinatura}" class="assinatura">
-` : ""}
-
-<p>
-<b>Status:</b>
-<span class="status ${item.status.toLowerCase()}">
-${item.status}
-</span>
-</p>
-
-<select class="statusSelect"
-onchange="alterar(${item.id},this.value)">
-<option value="">Alterar Status</option>
-<option>PENDENTE</option>
-<option>SEPARADO</option>
-<option>ENTREGUE</option>
-</select>
-
-</div>
-`;
-
-});
-
-/* CONTADORES */
-
-document.getElementById("total").innerText="Total: "+total;
-document.getElementById("pendentes").innerText="Pendentes: "+pend;
-document.getElementById("separados").innerText="Separados: "+sep;
-document.getElementById("entregues").innerText="Entregues: "+ent;
-
-/* ===== ATUALIZA GRAFICO ===== */
-
-atualizarGrafico(pend,sep,ent);
-
+    atualizarGrafico(pend,sep,ent);
 }
-
-/* ===== GRAFICO ===== */
 
 function atualizarGrafico(pend,sep,ent){
-
-const ctx=document.getElementById("graficoStatus");
-
-if(grafico) grafico.destroy();
-
-grafico=new Chart(ctx,{
-type:"pie",
-data:{
-labels:["Pendentes","Separados","Entregues"],
-datasets:[{
-data:[pend,sep,ent],
-backgroundColor:[
-"#facc15",
-"#3b82f6",
-"#22c55e"
-]
-}]
-},
-options:{
-plugins:{
-legend:{
-labels:{color:"white"}
+    const ctx=document.getElementById("graficoStatus");
+    if(grafico) grafico.destroy();
+    grafico=new Chart(ctx,{
+        type:"pie",
+        data:{
+            labels:["Pendentes","Separados","Entregues"],
+            datasets:[{
+                data:[pend,sep,ent],
+                backgroundColor:["#facc15","#3b82f6","#22c55e"]
+            }]
+        },
+        options:{ plugins:{ legend:{ labels:{color:"white"} } } }
+    });
 }
-}
-}
-});
-
-}
-
-/* ===== ALTERAR STATUS ===== */
 
 async function alterar(id,status){
-
-if(!status) return;
-
-await fetch(`${URL_SCRIPT}?func=atualizarStatus&id=${id}&status=${status}`);
-
-carregar();
-
+    if(!status) return;
+    const originalBtn = event.target;
+    originalBtn.disabled = true;
+    await fetch(`${URL_SCRIPT}?func=atualizarStatus&id=${id}&status=${status}`);
+    carregar();
 }
 
-/* ===== EVENTOS ===== */
-
+// Eventos de Busca Atualizados
+document.getElementById("buscaNome").oninput=renderizar;
+document.getElementById("buscaPosto").oninput=renderizar;
 document.getElementById("buscaCPF").oninput=renderizar;
 document.getElementById("buscaData").onchange=renderizar;
 document.getElementById("filtroStatus").onchange=renderizar;
 
-/* AUTO REFRESH */
-
-setInterval(carregar,15000);
-
+setInterval(carregar,30000); // Aumentado para 30s para economizar quota da planilha
 carregar();
-
 </script>
-
 </body>
 </html>
