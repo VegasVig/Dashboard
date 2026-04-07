@@ -104,6 +104,33 @@
         flex-direction:column;
         align-items:center;
     }
+    .tipoToggle{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-top:10px;
+}
+
+.tipoToggle button{
+    padding:10px 20px;
+    border-radius:10px;
+    border:1px solid #444;
+    background:#111;
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.tipoToggle button:hover{
+    background:#222;
+}
+
+.tipoToggle .ativo{
+    background:#c0c0c0;
+    color:black;
+    font-weight:bold;
+}
+
     .dataPedido{
         color:#9ca3af;
         font-size:14px;
@@ -118,9 +145,10 @@
     <img src="assets/vegaslogo.jpg" class="logo">
     <h2>UNIFORMES VEGAS VIGILÂNCIA</h2>
 </header>
-<select id="tipoDados">
-    <option value="uniformes">Uniformes</option>
-    <option value="materiais">Materiais</option>
+<div class="tipoToggle">
+    <button id="btnUniformes" class="ativo" onclick="trocarTipo('uniformes')">Uniformes</button>
+    <button id="btnMateriais" onclick="trocarTipo('materiais')">Materiais</button>
+</div>
 </select>
 <div class="filtros">
     <input type="text" id="buscaNome" placeholder="Buscar por Nome">
