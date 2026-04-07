@@ -118,7 +118,10 @@
     <img src="assets/vegaslogo.jpg" class="logo">
     <h2>UNIFORMES VEGAS VIGILÂNCIA</h2>
 </header>
-
+<select id="tipoDados">
+    <option value="uniformes">Uniformes</option>
+    <option value="materiais">Materiais</option>
+</select>
 <div class="filtros">
     <input type="text" id="buscaNome" placeholder="Buscar por Nome">
     <input type="text" id="buscaCPF" placeholder="Buscar CPF (apenas números)">
@@ -150,17 +153,23 @@
 <div class="container" id="lista"></div>
 
 <script>
-const URL_SCRIPT="https://script.google.com/macros/s/AKfycbzmIzhrbJtXHodZK8JBipv_BCVnTwA2cBA0MVDgZwH_qrWKJ0vIQTAIEwmmyGCsapyqYg/exec";
+const URL_SCRIPT="https://script.google.com/macros/s/AKfycbyl2kcZFgsZL31XF4zr-K6Us5bgRmLsjmRsf4OmngUWwnissd3v_CWuJw0338QPC31c8w/exec";
 
 let dadosGlobais=[];
 let grafico;
 
 async function carregar(){
     try {
-        const res=await fetch(URL_SCRIPT);
-        dadosGlobais=await res.json();
+        const tipo = document.getElementById("tipoDados").value;
+
+        const res = await fetch(`${URL_SCRIPT}?tipo=${tipo}`);
+        dadosGlobais = await res.json();
+
         renderizar();
-    } catch(e) { console.error("Erro ao carregar dados", e); }
+    } catch(e) { 
+        console.error("Erro ao carregar dados", e); 
+    }
+
 }
 
 function formatarData(dataBruta){
@@ -201,27 +210,44 @@ function renderizar(){
         if(item.status==="SEPARADO") sep++;
         if(item.status==="ENTREGUE") ent++;
 
-        container.innerHTML+=`
-        <div class="card">
-            <div class="nome">${item.nome}</div>
-            <p class="dataPedido"><b>Data do Pedido:</b> ${formatarData(item.data)}</p>
-            <p><b>CPF:</b> ${item.cpf}</p>
-            <p><b>Telefone:</b> ${item.telefone}</p>
-            <p><b>Posto:</b> ${item.posto || "Não informado"}</p>
-            <p><b>Uniformes:</b><br>${item.uniformes}</p>
-            <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
-            ${item.assinatura ? `<p><b>Assinatura:</b></p><img src="${item.assinatura}" class="assinatura">` : ""}
-            <p>
-                <b>Status:</b>
-                <span class="status ${item.status.toLowerCase()}">${item.status}</span>
-            </p>
-            <select class="statusSelect" onchange="alterar(${item.id},this.value)">
-                <option value="">Alterar Status</option>
-                <option>PENDENTE</option>
-                <option>SEPARADO</option>
-                <option>ENTREGUE</option>
-            </select>
-        </div>`;
+if(document.getElementById("tipoDados").value === "materiais"){
+
+    container.innerHTML+=`
+    <div class="card">
+        <div class="nome">${item.nome}</div>
+        <p class="dataPedido"><b>Data:</b> ${formatarData(item.data)}</p>
+        <p><b>Cidade:</b> ${item.cidade}</p>
+        <p><b>Posto:</b> ${item.posto}</p>
+        <p><b>Material:</b> ${item.material}</p>
+        <p><b>Quantidade:</b> ${item.quantidade}</p>
+        <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
+        ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
+    </div>`;
+    
+}else{
+
+    container.innerHTML+=`
+    <div class="card">
+        <div class="nome">${item.nome}</div>
+        <p class="dataPedido"><b>Data do Pedido:</b> ${formatarData(item.data)}</p>
+        <p><b>CPF:</b> ${item.cpf}</p>
+        <p><b>Telefone:</b> ${item.telefone}</p>
+        <p><b>Posto:</b> ${item.posto || "Não informado"}</p>
+        <p><b>Uniformes:</b><br>${item.uniformes}</p>
+        <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
+        ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
+        <p>
+            <b>Status:</b>
+            <span class="status ${item.status.toLowerCase()}">${item.status}</span>
+        </p>
+        <select class="statusSelect" onchange="alterar(${item.id},this.value)">
+            <option value="">Alterar Status</option>
+            <option>PENDENTE</option>
+            <option>SEPARADO</option>
+            <option>ENTREGUE</option>
+        </select>
+    </div>`;
+}
     });
 
     document.getElementById("total").innerText="Total: "+total;
