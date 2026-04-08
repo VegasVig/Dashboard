@@ -149,7 +149,7 @@
     <button id="btnUniformes" class="ativo" onclick="trocarTipo('uniformes')">Uniformes</button>
     <button id="btnMateriais" onclick="trocarTipo('materiais')">Materiais</button>
 </div>
-</select>
+
 <div class="filtros">
     <input type="text" id="buscaNome" placeholder="Buscar por Nome">
     <input type="text" id="buscaCPF" placeholder="Buscar CPF (apenas números)">
@@ -198,21 +198,21 @@
 }
 const URL_SCRIPT="https://script.google.com/macros/s/AKfycbyPXPOf0PY89bAAFuEwodPg0Jt8lJV-G09m8gqY_IP0NmzJkMkD7M4PgljTgPRFCzJmTw/exec";
 
-let dadosGlobais=[];
+dadosGlobais = await res.json();
+console.log(dadosGlobais);
 let grafico;
 
 async function carregar(){
     try {
-       await fetch(`${URL_SCRIPT}?func=atualizarStatus&id=${id}&status=${status}&tipo=${tipoAtual}`);
-
-        
+        const res = await fetch(`${URL_SCRIPT}?tipo=${tipoAtual}`);
+        dadosGlobais = await res.json();
 
         renderizar();
     } catch(e) { 
         console.error("Erro ao carregar dados", e); 
     }
-
 }
+
 
 function formatarData(dataBruta){
     if(!dataBruta) return "";
@@ -240,19 +240,19 @@ function renderizar(){
     dadosGlobais.slice().reverse().forEach(item=>{
         
         // Limpa o CPF que vem da planilha para comparar apenas números
-        const cpfItemLimpo = String(item.cpf).replace(/\D/g, "");
+     const cpfItemLimpo = item.cpf ? String(item.cpf).replace(/\D/g, "") : "";
 
-        if(nomeBusca && !item.nome.toLowerCase().includes(nomeBusca)) return;
+        if(nomeBusca && (!item.nome || !item.nome.toLowerCase().includes(nomeBusca))) return;
         if(cpfBuscaLimpo && !cpfItemLimpo.includes(cpfBuscaLimpo)) return;
         if(statusFiltro && item.status!==statusFiltro) return;
-        if(dataBusca && !item.data.includes(dataBusca.split("-").reverse().join("/"))) return;
+        if(dataBusca && (!item.data || !item.data.includes(dataBusca.split("-").reverse().join("/")))) return;
 
         total++;
         if(item.status==="PENDENTE") pend++;
         if(item.status==="SEPARADO") sep++;
         if(item.status==="ENTREGUE") ent++;
 
-if(document.getElementById("tipoDados").value === "materiais"){
+if(tipoAtual === "materiais"){
 
     container.innerHTML+=`
     <div class="card">
@@ -302,16 +302,7 @@ if(document.getElementById("tipoDados").value === "materiais"){
     <option>SEPARADO</option>
     <option>ENTREGUE</option>
 </select>
-        <p>
-            <b>Status:</b>
-            <span class="status ${item.status.toLowerCase()}">${item.status}</span>
-        </p>
-        <select class="statusSelect" onchange="alterar(${item.id},this.value)">
-            <option value="">Alterar Status</option>
-            <option>PENDENTE</option>
-            <option>SEPARADO</option>
-            <option>ENTREGUE</option>
-        </select>
+     
     </div>`;
 }
     });
@@ -353,6 +344,9 @@ document.getElementById("filtroStatus").onchange=renderizar;
 
 setInterval(carregar,30000);
 carregar();
+
 </script>
+
 </body>
+
 </html>
