@@ -181,6 +181,21 @@
 <div class="container" id="lista"></div>
 
 <script>
+    let tipoAtual = "uniformes";
+    function trocarTipo(tipo){
+    tipoAtual = tipo;
+
+    document.getElementById("btnUniformes").classList.remove("ativo");
+    document.getElementById("btnMateriais").classList.remove("ativo");
+
+    if(tipo === "uniformes"){
+        document.getElementById("btnUniformes").classList.add("ativo");
+    }else{
+        document.getElementById("btnMateriais").classList.add("ativo");
+    }
+
+    carregar();
+}
 const URL_SCRIPT="https://script.google.com/macros/s/AKfycbxdf-By8LJvisHeqrL9rgbj-bhzumhCds4RauFyMIa2NF3BceN7jaQVaPljlFVd6jxvVA/exec";
 
 let dadosGlobais=[];
@@ -188,10 +203,9 @@ let grafico;
 
 async function carregar(){
     try {
-        const tipo = document.getElementById("tipoDados").value;
+       await fetch(`${URL_SCRIPT}?func=atualizarStatus&id=${id}&status=${status}&tipo=${tipoAtual}`);
 
-        const res = await fetch(`${URL_SCRIPT}?tipo=${tipo}`);
-        dadosGlobais = await res.json();
+        
 
         renderizar();
     } catch(e) { 
@@ -250,6 +264,18 @@ if(document.getElementById("tipoDados").value === "materiais"){
         <p><b>Quantidade:</b> ${item.quantidade}</p>
         <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
         ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
+
+<p>
+    <b>Status:</b>
+    <span class="status ${item.status.toLowerCase()}">${item.status}</span>
+</p>
+
+<select class="statusSelect" onchange="alterar(${item.id},this.value)">
+    <option value="">Alterar Status</option>
+    <option>PENDENTE</option>
+    <option>SEPARADO</option>
+    <option>ENTREGUE</option>
+</select>
     </div>`;
     
 }else{
@@ -263,7 +289,19 @@ if(document.getElementById("tipoDados").value === "materiais"){
         <p><b>Posto:</b> ${item.posto || "Não informado"}</p>
         <p><b>Uniformes:</b><br>${item.uniformes}</p>
         <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
-        ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
+       ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
+
+<p>
+    <b>Status:</b>
+    <span class="status ${item.status.toLowerCase()}">${item.status}</span>
+</p>
+
+<select class="statusSelect" onchange="alterar(${item.id},this.value)">
+    <option value="">Alterar Status</option>
+    <option>PENDENTE</option>
+    <option>SEPARADO</option>
+    <option>ENTREGUE</option>
+</select>
         <p>
             <b>Status:</b>
             <span class="status ${item.status.toLowerCase()}">${item.status}</span>
