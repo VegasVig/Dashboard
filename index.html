@@ -105,36 +105,38 @@
         align-items:center;
     }
     .tipoToggle{
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    margin-top:10px;
-}
-
-.tipoToggle button{
-    padding:10px 20px;
-    border-radius:10px;
-    border:1px solid #444;
-    background:#111;
-    color:white;
-    cursor:pointer;
-    transition:0.3s;
-}
-
-.tipoToggle button:hover{
-    background:#222;
-}
-
-.tipoToggle .ativo{
-    background:#c0c0c0;
-    color:black;
-    font-weight:bold;
-}
-
+        display:flex;
+        justify-content:center;
+        gap:10px;
+        margin-top:10px;
+    }
+    .tipoToggle button{
+        padding:10px 20px;
+        border-radius:10px;
+        border:1px solid #444;
+        background:#111;
+        color:white;
+        cursor:pointer;
+        transition:0.3s;
+    }
+    .tipoToggle button:hover{
+        background:#222;
+    }
+    .tipoToggle .ativo{
+        background:#c0c0c0;
+        color:black;
+        font-weight:bold;
+    }
     .dataPedido{
         color:#9ca3af;
         font-size:14px;
         margin-bottom:8px;
+    }
+    #loadingMsg {
+        text-align:center;
+        padding:20px;
+        color:#9ca3af;
+        font-size:16px;
     }
 </style>
 </head>
@@ -145,6 +147,7 @@
     <img src="assets/vegaslogo.jpg" class="logo">
     <h2>UNIFORMES E MATERIAIS VEGAS VIGILÂNCIA</h2>
 </header>
+
 <div class="tipoToggle">
     <button id="btnUniformes" class="ativo" onclick="trocarTipo('uniformes')">Uniformes</button>
     <button id="btnMateriais" onclick="trocarTipo('materiais')">Materiais</button>
@@ -178,175 +181,170 @@
     <canvas id="graficoStatus"></canvas>
 </div>
 
+<div id="loadingMsg">Carregando dados...</div>
 <div class="container" id="lista"></div>
 
 <script>
+    // ✅ FIX 1: variável declarada corretamente no escopo global
+    let dadosGlobais = [];
     let tipoAtual = "uniformes";
+    let grafico;
+
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyP4O9-1HJsA2vuN821R53oOxv_LmHH1Kip66LxpEUatP2WP1zUj3_IBtB2RC5mJSkglA/exec";
+
     function trocarTipo(tipo){
-    tipoAtual = tipo;
+        tipoAtual = tipo;
+        document.getElementById("btnUniformes").classList.remove("ativo");
+        document.getElementById("btnMateriais").classList.remove("ativo");
 
-    document.getElementById("btnUniformes").classList.remove("ativo");
-    document.getElementById("btnMateriais").classList.remove("ativo");
+        if(tipo === "uniformes"){
+            document.getElementById("btnUniformes").classList.add("ativo");
+        } else {
+            document.getElementById("btnMateriais").classList.add("ativo");
+        }
 
-    if(tipo === "uniformes"){
-        document.getElementById("btnUniformes").classList.add("ativo");
-    }else{
-        document.getElementById("btnMateriais").classList.add("ativo");
+        carregar();
     }
 
-    carregar();
-}
-const URL_SCRIPT="https://script.google.com/macros/s/AKfycbyPXPOf0PY89bAAFuEwodPg0Jt8lJV-G09m8gqY_IP0NmzJkMkD7M4PgljTgPRFCzJmTw/exec";
-
-dadosGlobais = await res.json();
-console.log(dadosGlobais);
-let grafico;
-
-async function carregar(){
-    try {
-        const res = await fetch(`${URL_SCRIPT}?tipo=${tipoAtual}`);
-        dadosGlobais = await res.json();
-
-        renderizar();
-    } catch(e) { 
-        console.error("Erro ao carregar dados", e); 
+    // ✅ FIX 2: removida a linha solta "dadosGlobais = await res.json()" que estava fora de função
+    async function carregar(){
+        document.getElementById("loadingMsg").style.display = "block";
+        document.getElementById("loadingMsg").innerText = "Carregando dados...";
+        try {
+            const res = await fetch(`${URL_SCRIPT}?tipo=${tipoAtual}`);
+            dadosGlobais = await res.json();
+            document.getElementById("loadingMsg").style.display = "none";
+            renderizar();
+        } catch(e) {
+            document.getElementById("loadingMsg").innerText = "Erro ao carregar dados. Verifique a conexão.";
+            console.error("Erro ao carregar dados", e);
+        }
     }
-}
 
+    function formatarData(dataBruta){
+        if(!dataBruta) return "";
+        try{
+            const data = new Date(dataBruta);
+            return data.toLocaleString("pt-BR",{
+                day:"2-digit", month:"2-digit", year:"numeric",
+                hour:"2-digit", minute:"2-digit"
+            });
+        }catch{ return dataBruta; }
+    }
 
-function formatarData(dataBruta){
-    if(!dataBruta) return "";
-    try{
-        const data = new Date(dataBruta);
-        return data.toLocaleString("pt-BR",{
-            day:"2-digit", month:"2-digit", year:"numeric",
-            hour:"2-digit", minute:"2-digit"
+    function renderizar(){
+        const nomeBusca = document.getElementById("buscaNome").value.toLowerCase();
+        const cpfBuscaLimpo = document.getElementById("buscaCPF").value.replace(/\D/g, "");
+        const dataBusca = document.getElementById("buscaData").value;
+        const statusFiltro = document.getElementById("filtroStatus").value;
+
+        const container = document.getElementById("lista");
+        container.innerHTML = "";
+
+        let total=0, pend=0, sep=0, ent=0;
+
+        dadosGlobais.slice().reverse().forEach(item => {
+            const cpfItemLimpo = item.cpf ? String(item.cpf).replace(/\D/g, "") : "";
+
+            if(nomeBusca && (!item.nome || !item.nome.toLowerCase().includes(nomeBusca))) return;
+            if(cpfBuscaLimpo && !cpfItemLimpo.includes(cpfBuscaLimpo)) return;
+            if(statusFiltro && item.status !== statusFiltro) return;
+            if(dataBusca && (!item.data || !item.data.includes(dataBusca.split("-").reverse().join("/")))) return;
+
+            total++;
+            if(item.status === "PENDENTE") pend++;
+            if(item.status === "SEPARADO") sep++;
+            if(item.status === "ENTREGUE") ent++;
+
+            const statusClass = item.status ? item.status.toLowerCase() : "";
+
+            if(tipoAtual === "materiais"){
+                container.innerHTML += `
+                <div class="card">
+                    <div class="nome">${item.nome || ""}</div>
+                    <p class="dataPedido"><b>Data:</b> ${formatarData(item.data)}</p>
+                    <p><b>Cidade:</b> ${item.cidade || ""}</p>
+                    <p><b>Posto:</b> ${item.posto || ""}</p>
+                    <p><b>Material:</b> ${item.material || ""}</p>
+                    <p><b>Quantidade:</b> ${item.quantidade || ""}</p>
+                    <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
+                    ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
+                    <p>
+                        <b>Status:</b>
+                        <span class="status ${statusClass}">${item.status || ""}</span>
+                    </p>
+                    <select class="statusSelect" onchange="alterar(${item.id}, this.value)">
+                        <option value="">Alterar Status</option>
+                        <option>PENDENTE</option>
+                        <option>SEPARADO</option>
+                        <option>ENTREGUE</option>
+                    </select>
+                </div>`;
+            } else {
+                container.innerHTML += `
+                <div class="card">
+                    <div class="nome">${item.nome || ""}</div>
+                    <p class="dataPedido"><b>Data do Pedido:</b> ${formatarData(item.data)}</p>
+                    <p><b>CPF:</b> ${item.cpf || ""}</p>
+                    <p><b>Telefone:</b> ${item.telefone || ""}</p>
+                    <p><b>Posto:</b> ${item.posto || "Não informado"}</p>
+                    <p><b>Uniformes:</b><br>${item.uniformes || ""}</p>
+                    <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
+                    ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
+                    <p>
+                        <b>Status:</b>
+                        <span class="status ${statusClass}">${item.status || ""}</span>
+                    </p>
+                    <select class="statusSelect" onchange="alterar(${item.id}, this.value)">
+                        <option value="">Alterar Status</option>
+                        <option>PENDENTE</option>
+                        <option>SEPARADO</option>
+                        <option>ENTREGUE</option>
+                    </select>
+                </div>`;
+            }
         });
-    }catch{ return dataBruta; }
-}
 
-function renderizar(){
-    const nomeBusca = document.getElementById("buscaNome").value.toLowerCase();
-    // Pega apenas os números digitados na busca
-    const cpfBuscaLimpo = document.getElementById("buscaCPF").value.replace(/\D/g, "");
-    const dataBusca = document.getElementById("buscaData").value;
-    const statusFiltro = document.getElementById("filtroStatus").value;
+        document.getElementById("total").innerText = "Total: " + total;
+        document.getElementById("pendentes").innerText = "Pendentes: " + pend;
+        document.getElementById("separados").innerText = "Separados: " + sep;
+        document.getElementById("entregues").innerText = "Entregues: " + ent;
 
-    const container=document.getElementById("lista");
-    container.innerHTML="";
+        atualizarGrafico(pend, sep, ent);
+    }
 
-    let total=0,pend=0,sep=0,ent=0;
+    function atualizarGrafico(pend, sep, ent){
+        const ctx = document.getElementById("graficoStatus");
+        if(grafico) grafico.destroy();
+        grafico = new Chart(ctx, {
+            type: "pie",
+            data: {
+                labels: ["Pendentes","Separados","Entregues"],
+                datasets: [{
+                    data: [pend, sep, ent],
+                    backgroundColor: ["#facc15","#3b82f6","#22c55e"]
+                }]
+            },
+            options: { plugins: { legend: { labels: { color: "white" } } } }
+        });
+    }
 
-    dadosGlobais.slice().reverse().forEach(item=>{
-        
-        // Limpa o CPF que vem da planilha para comparar apenas números
-     const cpfItemLimpo = item.cpf ? String(item.cpf).replace(/\D/g, "") : "";
+    // ✅ FIX 3: agora passa o tipoAtual para a função alterar, garantindo que
+    // materiais atualizem na Página2 e uniformes na Página1
+    async function alterar(id, status){
+        if(!status) return;
+        await fetch(`${URL_SCRIPT}?func=atualizarStatus&id=${id}&status=${status}&tipo=${tipoAtual}`);
+        carregar();
+    }
 
-        if(nomeBusca && (!item.nome || !item.nome.toLowerCase().includes(nomeBusca))) return;
-        if(cpfBuscaLimpo && !cpfItemLimpo.includes(cpfBuscaLimpo)) return;
-        if(statusFiltro && item.status!==statusFiltro) return;
-        if(dataBusca && (!item.data || !item.data.includes(dataBusca.split("-").reverse().join("/")))) return;
+    document.getElementById("buscaNome").oninput = renderizar;
+    document.getElementById("buscaCPF").oninput = renderizar;
+    document.getElementById("buscaData").onchange = renderizar;
+    document.getElementById("filtroStatus").onchange = renderizar;
 
-        total++;
-        if(item.status==="PENDENTE") pend++;
-        if(item.status==="SEPARADO") sep++;
-        if(item.status==="ENTREGUE") ent++;
-
-if(tipoAtual === "materiais"){
-
-    container.innerHTML+=`
-    <div class="card">
-        <div class="nome">${item.nome}</div>
-        <p class="dataPedido"><b>Data:</b> ${formatarData(item.data)}</p>
-        <p><b>Cidade:</b> ${item.cidade}</p>
-        <p><b>Posto:</b> ${item.posto}</p>
-        <p><b>Material:</b> ${item.material}</p>
-        <p><b>Quantidade:</b> ${item.quantidade}</p>
-        <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
-        ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
-
-<p>
-    <b>Status:</b>
-    <span class="status ${item.status.toLowerCase()}">${item.status}</span>
-</p>
-
-<select class="statusSelect" onchange="alterar(${item.id},this.value)">
-    <option value="">Alterar Status</option>
-    <option>PENDENTE</option>
-    <option>SEPARADO</option>
-    <option>ENTREGUE</option>
-</select>
-    </div>`;
-    
-}else{
-
-    container.innerHTML+=`
-    <div class="card">
-        <div class="nome">${item.nome}</div>
-        <p class="dataPedido"><b>Data do Pedido:</b> ${formatarData(item.data)}</p>
-        <p><b>CPF:</b> ${item.cpf}</p>
-        <p><b>Telefone:</b> ${item.telefone}</p>
-        <p><b>Posto:</b> ${item.posto || "Não informado"}</p>
-        <p><b>Uniformes:</b><br>${item.uniformes}</p>
-        <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
-       ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
-
-<p>
-    <b>Status:</b>
-    <span class="status ${item.status.toLowerCase()}">${item.status}</span>
-</p>
-
-<select class="statusSelect" onchange="alterar(${item.id},this.value)">
-    <option value="">Alterar Status</option>
-    <option>PENDENTE</option>
-    <option>SEPARADO</option>
-    <option>ENTREGUE</option>
-</select>
-     
-    </div>`;
-}
-    });
-
-    document.getElementById("total").innerText="Total: "+total;
-    document.getElementById("pendentes").innerText="Pendentes: "+pend;
-    document.getElementById("separados").innerText="Separados: "+sep;
-    document.getElementById("entregues").innerText="Entregues: "+ent;
-
-    atualizarGrafico(pend,sep,ent);
-}
-
-function atualizarGrafico(pend,sep,ent){
-    const ctx=document.getElementById("graficoStatus");
-    if(grafico) grafico.destroy();
-    grafico=new Chart(ctx,{
-        type:"pie",
-        data:{
-            labels:["Pendentes","Separados","Entregues"],
-            datasets:[{
-                data:[pend,sep,ent],
-                backgroundColor:["#facc15","#3b82f6","#22c55e"]
-            }]
-        },
-        options:{ plugins:{ legend:{ labels:{color:"white"} } } }
-    });
-}
-
-async function alterar(id,status){
-    if(!status) return;
-    await fetch(`${URL_SCRIPT}?func=atualizarStatus&id=${id}&status=${status}`);
+    setInterval(carregar, 30000);
     carregar();
-}
-
-document.getElementById("buscaNome").oninput=renderizar;
-document.getElementById("buscaCPF").oninput=renderizar;
-document.getElementById("buscaData").onchange=renderizar;
-document.getElementById("filtroStatus").onchange=renderizar;
-
-setInterval(carregar,30000);
-carregar();
-
 </script>
 
 </body>
-
 </html>
