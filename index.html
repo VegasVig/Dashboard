@@ -186,6 +186,10 @@
 <div class="graficoBox">
     <canvas id="graficoStatus"></canvas>
 </div>
+${item.foto ? `
+<p><b>Foto da Avaria:</b></p>
+<img src="${item.foto}" style="max-width:100%; border-radius:10px; margin-top:5px;">
+` : ""}
 
 <div id="loadingMsg">Carregando dados...</div>
 <div class="container" id="lista"></div>
@@ -196,7 +200,7 @@
     let tipoAtual = "uniformes";
     let grafico;
 
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzShsqxbC--wyUm41iunQ_nrIbEynfPW9pp8qVmie42_hZ-i27chbUGJX1QXkTbQQGW/exec";
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx0G5A964N8h7CyJuD6y3kT-FTtoNHq9UAcqO3NIMIoVETRS8JAvTlVLnhoV6hP0LeFsA/exec";
 
     function trocarTipo(tipo){
         tipoAtual = tipo;
