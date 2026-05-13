@@ -8,8 +8,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
     <style>
         body {
             margin: 0;
@@ -66,15 +64,6 @@
             font-weight: bold;
         }
 
-        .graficoBox {
-            max-width: 500px;
-            margin: 20px auto;
-            background: #121212;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #2a2a2a;
-        }
-
         .container {
             max-width: 1100px;
             margin: auto;
@@ -91,10 +80,10 @@
         }
 
         .nome {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #fff;
+            color: white;
         }
 
         .status {
@@ -110,11 +99,12 @@
 
         .pendente {
             background: #facc15;
-            color: #000;
+            color: black;
         }
 
         .separado {
             background: #3b82f6;
+            color: white;
         }
 
         .entregue {
@@ -142,16 +132,9 @@
             margin-top: 10px;
         }
 
-        select.statusSelect {
-            margin-top: 10px;
+        .statusSelect {
+            margin-top: 15px;
             width: 100%;
-        }
-
-        .linhaData {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
 
         .tipoToggle {
@@ -169,11 +152,6 @@
             background: #111;
             color: white;
             cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .tipoToggle button:hover {
-            background: #222;
         }
 
         .tipoToggle .ativo {
@@ -182,24 +160,17 @@
             font-weight: bold;
         }
 
-        .dataPedido {
-            color: #9ca3af;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
         #loadingMsg {
             text-align: center;
             padding: 20px;
-            color: #9ca3af;
-            font-size: 16px;
         }
 
-        .rankingItem {
-            background: #1b1b1b;
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 8px;
+        .graficoBox {
+            max-width: 450px;
+            margin: 20px auto;
+            background: #121212;
+            padding: 15px;
+            border-radius: 12px;
             border: 1px solid #2a2a2a;
         }
     </style>
@@ -213,7 +184,8 @@
     </header>
 
     <div class="tipoToggle">
-        <button id="btnUniformes" class="ativo"
+        <button id="btnUniformes"
+            class="ativo"
             onclick="trocarTipo('uniformes')">
             Uniformes
         </button>
@@ -239,24 +211,36 @@
             placeholder="Buscar Protocolo">
 
         <select id="filtroStatus">
-            <option value="">Todos Status</option>
-            <option value="EM ANÁLISE">EM ANÁLISE</option>
-            <option value="PENDENTE">PENDENTE</option>
-            <option value="SEPARADO">SEPARADO</option>
-            <option value="ENTREGUE">ENTREGUE</option>
+
+            <option value="">
+                Todos Status
+            </option>
+
+            <option value="EM ANÁLISE">
+                EM ANÁLISE
+            </option>
+
+            <option value="PENDENTE">
+                PENDENTE
+            </option>
+
+            <option value="SEPARADO">
+                SEPARADO
+            </option>
+
+            <option value="ENTREGUE">
+                ENTREGUE
+            </option>
+
         </select>
 
-        <div class="linhaData">
-            <h3 style="margin:10px 0 5px 0;font-size:14px;">
-                FILTRAR POR DATA
-            </h3>
-
-            <input type="date" id="buscaData">
-        </div>
     </div>
 
     <div class="stats">
-        <div class="stat" id="total">Total: 0</div>
+
+        <div class="stat" id="total">
+            Total: 0
+        </div>
 
         <div class="stat"
             id="analise"
@@ -281,25 +265,6 @@
             style="color:#22c55e">
             Entregues: 0
         </div>
-    </div>
-
-    <div class="tipoToggle">
-
-        <button onclick="exportarPDF('EM ANÁLISE')">
-            PDF EM ANÁLISE
-        </button>
-
-        <button onclick="exportarPDF('PENDENTE')">
-            PDF PENDENTES
-        </button>
-
-        <button onclick="exportarPDF('SEPARADO')">
-            PDF SEPARADOS
-        </button>
-
-        <button onclick="exportarPDF('ENTREGUE')">
-            PDF ENTREGUES
-        </button>
 
     </div>
 
@@ -307,12 +272,9 @@
         <canvas id="graficoStatus"></canvas>
     </div>
 
-    <div class="graficoBox">
-        <h3>Funcionários que mais solicitaram</h3>
-        <div id="rankingFuncionarios"></div>
+    <div id="loadingMsg">
+        Carregando dados...
     </div>
-
-    <div id="loadingMsg">Carregando dados...</div>
 
     <div class="container" id="lista"></div>
 
@@ -323,7 +285,7 @@
         let grafico;
 
         const URL_SCRIPT =
-            "https://script.google.com/macros/s/AKfycbxPjmCoiEZiCA1fOn5WKjENHaZpV9NTLrXK7KDqalRxTmHjD1XpsWBIOMSOrgsbLLroGQ/exec";
+            "https://script.google.com/macros/s/AKfycbxeFZGXM28fUn8_2wA_hAAQ9v_N62Rm-RksUlGFbs4ofpYlwKOuA_d_J2awDDDnTZ6f0Q/exec";
 
         function trocarTipo(tipo) {
 
@@ -336,9 +298,12 @@
                 .classList.remove("ativo");
 
             if (tipo === "uniformes") {
+
                 document.getElementById("btnUniformes")
                     .classList.add("ativo");
+
             } else {
+
                 document.getElementById("btnMateriais")
                     .classList.add("ativo");
             }
@@ -359,6 +324,34 @@
 
                 dadosGlobais = await res.json();
 
+                dadosGlobais = dadosGlobais.map(item => {
+
+                    let fotosTemp =
+                        item.fotos || item.foto || "";
+
+                    if (typeof fotosTemp === "string") {
+
+                        try {
+
+                            fotosTemp =
+                                JSON.parse(fotosTemp);
+
+                        } catch {
+
+                            fotosTemp = fotosTemp
+                                .split(" | ")
+                                .filter(f => f.trim() !== "");
+                        }
+                    }
+
+                    item.fotos =
+                        Array.isArray(fotosTemp)
+                            ? fotosTemp
+                            : [];
+
+                    return item;
+                });
+
                 document.getElementById("loadingMsg")
                     .style.display = "none";
 
@@ -369,8 +362,8 @@
                 console.error(e);
 
                 document.getElementById("loadingMsg")
-                    .innerText = "Erro ao carregar";
-
+                    .innerText =
+                    "Erro ao carregar dados";
             }
         }
 
@@ -383,17 +376,18 @@
                 const data = new Date(dataBruta);
 
                 return data.toLocaleString("pt-BR", {
+
                     day: "2-digit",
                     month: "2-digit",
                     year: "numeric",
                     hour: "2-digit",
                     minute: "2-digit"
+
                 });
 
             } catch {
 
                 return dataBruta;
-
             }
         }
 
@@ -415,10 +409,6 @@
                 document.getElementById("filtroStatus")
                     .value;
 
-            const dataBusca =
-                document.getElementById("buscaData")
-                    .value;
-
             const container =
                 document.getElementById("lista");
 
@@ -430,176 +420,267 @@
             let sep = 0;
             let ent = 0;
 
-            dadosGlobais.slice().reverse().forEach(item => {
+            dadosGlobais
+                .slice()
+                .reverse()
+                .forEach(item => {
 
-                const cpfItem =
-                    item.cpf
-                        ? String(item.cpf).replace(/\D/g, "")
-                        : "";
+                    const cpfItem =
+                        item.cpf
+                            ? String(item.cpf)
+                                .replace(/\D/g, "")
+                            : "";
 
-                if (
-                    nomeBusca &&
-                    (!item.nome ||
-                        !item.nome.toLowerCase()
-                            .includes(nomeBusca))
-                ) return;
+                    if (
+                        nomeBusca &&
+                        (!item.nome ||
+                            !item.nome.toLowerCase()
+                                .includes(nomeBusca))
+                    ) return;
 
-                if (
-                    cpfBusca &&
-                    !cpfItem.includes(cpfBusca)
-                ) return;
+                    if (
+                        tipoAtual === "uniformes" &&
+                        cpfBusca &&
+                        !cpfItem.includes(cpfBusca)
+                    ) return;
 
-                if (
-                    protocoloBusca &&
-                    (!item.protocolo ||
-                        !item.protocolo.toLowerCase()
-                            .includes(protocoloBusca))
-                ) return;
+                    if (
+                        protocoloBusca &&
+                        (!item.protocolo ||
+                            !String(item.protocolo)
+                                .toLowerCase()
+                                .includes(protocoloBusca))
+                    ) return;
 
-                if (
-                    statusFiltro &&
-                    item.status !== statusFiltro
-                ) return;
+                    if (
+                        statusFiltro &&
+                        item.status !== statusFiltro
+                    ) return;
 
-                if (
-                    dataBusca &&
-                    (!item.data ||
-                        !item.data.includes(
-                            dataBusca
-                                .split("-")
-                                .reverse()
-                                .join("/")
-                        ))
-                ) return;
+                    total++;
 
-                total++;
+                    if (item.status === "EM ANÁLISE")
+                        analise++;
 
-                if (item.status === "EM ANÁLISE")
-                    analise++;
+                    if (item.status === "PENDENTE")
+                        pend++;
 
-                if (item.status === "PENDENTE")
-                    pend++;
+                    if (item.status === "SEPARADO")
+                        sep++;
 
-                if (item.status === "SEPARADO")
-                    sep++;
+                    if (item.status === "ENTREGUE")
+                        ent++;
 
-                if (item.status === "ENTREGUE")
-                    ent++;
-
-                const statusClass =
-                    item.status
-                        ? item.status
+                    const statusClass =
+                        item.status
                             .toLowerCase()
-                            .replace(" ", "-")
-                        : "";
+                            .replace(" ", "-");
 
-                container.innerHTML += `
-                <div class="card">
+                    if (tipoAtual === "materiais") {
 
-                    <div class="nome">
-                        ${item.nome || ""}
-                    </div>
+                        container.innerHTML += `
 
-                    <p>
-                        <b>Protocolo:</b>
-                        ${item.protocolo || ""}
-                    </p>
+                        <div class="card">
 
-                    <p class="dataPedido">
-                        <b>Data:</b>
-                        ${formatarData(item.data)}
-                    </p>
-
-                    <p>
-                        <b>CPF:</b>
-                        ${item.cpf || ""}
-                    </p>
-
-                    <p>
-                        <b>Telefone:</b>
-                        ${item.telefone || ""}
-                    </p>
-
-                    <p>
-                        <b>Posto:</b>
-                        ${item.posto || ""}
-                    </p>
-
-                    <p>
-                        <b>Uniformes:</b><br>
-                        ${item.uniformes || ""}
-                    </p>
-
-                    <p>
-                        <b>Obs:</b>
-                        ${item.observacao || "Nenhuma"}
-                    </p>
-
-                    ${
-                        item.assinatura
-                        ? `
-                        <img src="${item.assinatura}"
-                        class="assinatura">
-                        `
-                        : ""
-                    }
-
-                    ${
-                        item.fotos &&
-                        item.fotos.length > 0
-                        ? `
-                        <div style="margin-top:15px;">
-                            <b>Fotos da avaria:</b>
-
-                            <div class="fotosBox">
-
-                                ${item.fotos.map(f => `
-                                    <img src="${f}"
-                                    class="fotoAvaria">
-                                `).join("")}
-
+                            <div class="nome">
+                                ${item.nome || ""}
                             </div>
+
+                            <p>
+                                <b>Protocolo:</b>
+                                ${item.protocolo || ""}
+                            </p>
+
+                            <p>
+                                <b>Data:</b>
+                                ${formatarData(item.data)}
+                            </p>
+
+                            <p>
+                                <b>Cidade:</b>
+                                ${item.cidade || ""}
+                            </p>
+
+                            <p>
+                                <b>Posto:</b>
+                                ${item.posto || ""}
+                            </p>
+
+                            <p>
+                                <b>Material:</b>
+                                ${item.material || ""}
+                            </p>
+
+                            <p>
+                                <b>Quantidade:</b>
+                                ${item.quantidade || ""}
+                            </p>
+
+                            <p>
+                                <b>Obs:</b>
+                                ${item.obs || "Nenhuma"}
+                            </p>
+
+                            ${
+                                item.assinatura
+                                ? `
+                                <img src="${item.assinatura}"
+                                class="assinatura">
+                                `
+                                : ""
+                            }
+
+                            ${
+                                item.fotos.length > 0
+                                ? `
+                                <div style="margin-top:15px;">
+
+                                    <b>Fotos:</b>
+
+                                    <div class="fotosBox">
+
+                                        ${item.fotos.map(f => `
+                                            <img src="${f}"
+                                            class="fotoAvaria">
+                                        `).join("")}
+
+                                    </div>
+
+                                </div>
+                                `
+                                : ""
+                            }
+
+                            <p style="margin-top:15px;">
+
+                                <b>Status:</b>
+
+                                <span class="status ${statusClass}">
+                                    ${item.status}
+                                </span>
+
+                            </p>
+
+                            <select class="statusSelect"
+                                onchange="alterar(${item.id}, this.value)">
+
+                                <option value="">
+                                    Alterar Status
+                                </option>
+
+                                <option>EM ANÁLISE</option>
+                                <option>PENDENTE</option>
+                                <option>SEPARADO</option>
+                                <option>ENTREGUE</option>
+
+                            </select>
+
                         </div>
-                        `
-                        : ""
+                        `;
+
+                    } else {
+
+                        container.innerHTML += `
+
+                        <div class="card">
+
+                            <div class="nome">
+                                ${item.nome || ""}
+                            </div>
+
+                            <p>
+                                <b>Protocolo:</b>
+                                ${item.protocolo || ""}
+                            </p>
+
+                            <p>
+                                <b>Data:</b>
+                                ${formatarData(item.data)}
+                            </p>
+
+                            <p>
+                                <b>CPF:</b>
+                                ${item.cpf || ""}
+                            </p>
+
+                            <p>
+                                <b>Telefone:</b>
+                                ${item.telefone || ""}
+                            </p>
+
+                            <p>
+                                <b>Posto:</b>
+                                ${item.posto || ""}
+                            </p>
+
+                            <p>
+                                <b>Uniformes:</b><br>
+                                ${item.uniformes || ""}
+                            </p>
+
+                            <p>
+                                <b>Obs:</b>
+                                ${item.observacao || "Nenhuma"}
+                            </p>
+
+                            ${
+                                item.assinatura
+                                ? `
+                                <img src="${item.assinatura}"
+                                class="assinatura">
+                                `
+                                : ""
+                            }
+
+                            ${
+                                item.fotos.length > 0
+                                ? `
+                                <div style="margin-top:15px;">
+
+                                    <b>Fotos:</b>
+
+                                    <div class="fotosBox">
+
+                                        ${item.fotos.map(f => `
+                                            <img src="${f}"
+                                            class="fotoAvaria">
+                                        `).join("")}
+
+                                    </div>
+
+                                </div>
+                                `
+                                : ""
+                            }
+
+                            <p style="margin-top:15px;">
+
+                                <b>Status:</b>
+
+                                <span class="status ${statusClass}">
+                                    ${item.status}
+                                </span>
+
+                            </p>
+
+                            <select class="statusSelect"
+                                onchange="alterar(${item.id}, this.value)">
+
+                                <option value="">
+                                    Alterar Status
+                                </option>
+
+                                <option>EM ANÁLISE</option>
+                                <option>PENDENTE</option>
+                                <option>SEPARADO</option>
+                                <option>ENTREGUE</option>
+
+                            </select>
+
+                        </div>
+                        `;
                     }
-
-                    <p style="margin-top:15px;">
-                        <b>Status:</b>
-
-                        <span class="status ${statusClass}">
-                            ${item.status || ""}
-                        </span>
-                    </p>
-
-                    <select class="statusSelect"
-                        onchange="alterar(${item.id}, this.value)">
-
-                        <option value="">
-                            Alterar Status
-                        </option>
-
-                        <option>
-                            EM ANÁLISE
-                        </option>
-
-                        <option>
-                            PENDENTE
-                        </option>
-
-                        <option>
-                            SEPARADO
-                        </option>
-
-                        <option>
-                            ENTREGUE
-                        </option>
-
-                    </select>
-
-                </div>
-                `;
-            });
+                });
 
             document.getElementById("total")
                 .innerText = "Total: " + total;
@@ -622,8 +703,6 @@
                 sep,
                 ent
             );
-
-            atualizarRanking();
         }
 
         function atualizarGrafico(
@@ -668,52 +747,8 @@
                             "#22c55e"
                         ]
                     }]
-                },
-
-                options: {
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: "white"
-                            }
-                        }
-                    }
                 }
             });
-        }
-
-        function atualizarRanking() {
-
-            const ranking = {};
-
-            dadosGlobais.forEach(item => {
-
-                if (!item.nome) return;
-
-                ranking[item.nome] =
-                    (ranking[item.nome] || 0) + 1;
-            });
-
-            const top = Object.entries(ranking)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-
-            document.getElementById(
-                "rankingFuncionarios"
-            ).innerHTML = top.map((r, i) => `
-
-                <div class="rankingItem">
-
-                    ${i + 1}.
-                    <b>${r[0]}</b>
-
-                    <br>
-
-                    ${r[1]} solicitações
-
-                </div>
-
-            `).join("");
         }
 
         async function alterar(id, status) {
@@ -727,99 +762,6 @@
             carregar();
         }
 
-        async function exportarPDF(statusFiltro) {
-
-            const { jsPDF } = window.jspdf;
-
-            const pdf = new jsPDF();
-
-            pdf.setFontSize(18);
-
-            pdf.text(
-                `RELATÓRIO ${statusFiltro}`,
-                20,
-                20
-            );
-            dadosGlobais = dadosGlobais.map(item => {
-
-    // suporte para "foto" ou "fotos"
-    let fotosTemp = item.fotos || item.foto || "";
-
-    // transforma string em array
-    if (typeof fotosTemp === "string") {
-
-        fotosTemp = fotosTemp
-            .split(" | ")
-            .filter(f => f.trim() !== "");
-
-    }
-
-    item.fotos = Array.isArray(fotosTemp)
-        ? fotosTemp
-        : [];
-
-    return item;
-});
-
-            let y = 35;
-
-            const itens = dadosGlobais.filter(
-                item => item.status === statusFiltro
-            );
-
-            itens.forEach((item, i) => {
-
-                pdf.setFontSize(12);
-
-                pdf.text(
-                    `${i + 1}. ${item.nome}`,
-                    20,
-                    y
-                );
-
-                y += 7;
-
-                pdf.text(
-                    `Protocolo: ${item.protocolo || ""}`,
-                    20,
-                    y
-                );
-
-                y += 7;
-
-                pdf.text(
-                    `Posto: ${item.posto || ""}`,
-                    20,
-                    y
-                );
-
-                y += 7;
-
-                const texto =
-                    pdf.splitTextToSize(
-                        `Uniformes: ${item.uniformes || ""}`,
-                        170
-                    );
-
-                pdf.text(texto, 20, y);
-
-                y += texto.length * 7;
-
-                y += 10;
-
-                if (y > 260) {
-
-                    pdf.addPage();
-
-                    y = 20;
-                }
-            });
-
-            pdf.save(
-                `uniformes_${statusFiltro}.pdf`
-            );
-        }
-
         document.getElementById("buscaNome")
             .oninput = renderizar;
 
@@ -830,9 +772,6 @@
             .oninput = renderizar;
 
         document.getElementById("filtroStatus")
-            .onchange = renderizar;
-
-        document.getElementById("buscaData")
             .onchange = renderizar;
 
         setInterval(carregar, 30000);
