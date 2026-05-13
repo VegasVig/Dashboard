@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNIFORMES Vegas</title>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         body {
@@ -45,7 +48,6 @@
             min-width: 180px;
             width: 280px;
             box-sizing: border-box;
-
         }
 
         .stats {
@@ -65,7 +67,7 @@
         }
 
         .graficoBox {
-            max-width: 350px;
+            max-width: 500px;
             margin: 20px auto;
             background: #121212;
             padding: 15px;
@@ -101,6 +103,11 @@
             font-weight: bold;
         }
 
+        .em-análise {
+            background: #f97316;
+            color: white;
+        }
+
         .pendente {
             background: #facc15;
             color: #000;
@@ -122,12 +129,22 @@
             max-width: 260px;
         }
 
+        .fotoAvaria {
+            width: 120px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+
+        .fotosBox {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
         select.statusSelect {
             margin-top: 10px;
-            min-width: 180px;
             width: 100%;
-            max-width: 100%;
-
         }
 
         .linhaData {
@@ -142,6 +159,7 @@
             justify-content: center;
             gap: 10px;
             margin-top: 10px;
+            flex-wrap: wrap;
         }
 
         .tipoToggle button {
@@ -176,6 +194,14 @@
             color: #9ca3af;
             font-size: 16px;
         }
+
+        .rankingItem {
+            background: #1b1b1b;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 8px;
+            border: 1px solid #2a2a2a;
+        }
     </style>
 </head>
 
@@ -187,205 +213,612 @@
     </header>
 
     <div class="tipoToggle">
-        <button id="btnUniformes" class="ativo" onclick="trocarTipo('uniformes')">Uniformes</button>
-        <button id="btnMateriais" onclick="trocarTipo('materiais')">Materiais</button>
+        <button id="btnUniformes" class="ativo"
+            onclick="trocarTipo('uniformes')">
+            Uniformes
+        </button>
+
+        <button id="btnMateriais"
+            onclick="trocarTipo('materiais')">
+            Materiais
+        </button>
     </div>
 
     <div class="filtros">
-        <input type="text" id="buscaNome" placeholder="Buscar por Nome">
-        <input type="text" id="buscaCPF" placeholder="Buscar CPF (apenas números)">
+
+        <input type="text"
+            id="buscaNome"
+            placeholder="Buscar Nome">
+
+        <input type="text"
+            id="buscaCPF"
+            placeholder="Buscar CPF">
+
+        <input type="text"
+            id="buscaProtocolo"
+            placeholder="Buscar Protocolo">
 
         <select id="filtroStatus">
             <option value="">Todos Status</option>
+            <option value="EM ANÁLISE">EM ANÁLISE</option>
             <option value="PENDENTE">PENDENTE</option>
             <option value="SEPARADO">SEPARADO</option>
             <option value="ENTREGUE">ENTREGUE</option>
         </select>
 
         <div class="linhaData">
-            <h3 style="margin: 10px 0 5px 0; font-size: 14px;">FILTRAR POR DATA</h3>
+            <h3 style="margin:10px 0 5px 0;font-size:14px;">
+                FILTRAR POR DATA
+            </h3>
+
             <input type="date" id="buscaData">
         </div>
     </div>
 
     <div class="stats">
         <div class="stat" id="total">Total: 0</div>
-        <div class="stat" id="pendentes" style="color:#facc15">Pendentes: 0</div>
-        <div class="stat" id="separados" style="color:#3b82f6">Separados: 0</div>
-        <div class="stat" id="entregues" style="color:#22c55e">Entregues: 0</div>
+
+        <div class="stat"
+            id="analise"
+            style="color:#f97316">
+            Em análise: 0
+        </div>
+
+        <div class="stat"
+            id="pendentes"
+            style="color:#facc15">
+            Pendentes: 0
+        </div>
+
+        <div class="stat"
+            id="separados"
+            style="color:#3b82f6">
+            Separados: 0
+        </div>
+
+        <div class="stat"
+            id="entregues"
+            style="color:#22c55e">
+            Entregues: 0
+        </div>
+    </div>
+
+    <div class="tipoToggle">
+
+        <button onclick="exportarPDF('EM ANÁLISE')">
+            PDF EM ANÁLISE
+        </button>
+
+        <button onclick="exportarPDF('PENDENTE')">
+            PDF PENDENTES
+        </button>
+
+        <button onclick="exportarPDF('SEPARADO')">
+            PDF SEPARADOS
+        </button>
+
+        <button onclick="exportarPDF('ENTREGUE')">
+            PDF ENTREGUES
+        </button>
+
     </div>
 
     <div class="graficoBox">
         <canvas id="graficoStatus"></canvas>
     </div>
 
+    <div class="graficoBox">
+        <h3>Funcionários que mais solicitaram</h3>
+        <div id="rankingFuncionarios"></div>
+    </div>
+
     <div id="loadingMsg">Carregando dados...</div>
+
     <div class="container" id="lista"></div>
 
     <script>
-        // ✅ FIX 1: variável declarada corretamente no escopo global
+
         let dadosGlobais = [];
         let tipoAtual = "uniformes";
         let grafico;
 
-        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbx0G5A964N8h7CyJuD6y3kT-FTtoNHq9UAcqO3NIMIoVETRS8JAvTlVLnhoV6hP0LeFsA/exec";
+        const URL_SCRIPT =
+            "https://script.google.com/macros/s/AKfycbxQ6H-X_ZZSr_41cTRLWb_c1hgVySZnLKG1TITAG87FHH4PLhSHy7irOJkBmNika-7Q/exec";
 
         function trocarTipo(tipo) {
+
             tipoAtual = tipo;
-            document.getElementById("btnUniformes").classList.remove("ativo");
-            document.getElementById("btnMateriais").classList.remove("ativo");
+
+            document.getElementById("btnUniformes")
+                .classList.remove("ativo");
+
+            document.getElementById("btnMateriais")
+                .classList.remove("ativo");
 
             if (tipo === "uniformes") {
-                document.getElementById("btnUniformes").classList.add("ativo");
+                document.getElementById("btnUniformes")
+                    .classList.add("ativo");
             } else {
-                document.getElementById("btnMateriais").classList.add("ativo");
+                document.getElementById("btnMateriais")
+                    .classList.add("ativo");
             }
 
             carregar();
         }
 
-        // ✅ FIX 2: removida a linha solta "dadosGlobais = await res.json()" que estava fora de função
         async function carregar() {
-            document.getElementById("loadingMsg").style.display = "block";
-            document.getElementById("loadingMsg").innerText = "Carregando dados...";
+
+            document.getElementById("loadingMsg")
+                .style.display = "block";
+
             try {
-                const res = await fetch(`${URL_SCRIPT}?tipo=${tipoAtual}`);
+
+                const res = await fetch(
+                    `${URL_SCRIPT}?tipo=${tipoAtual}`
+                );
+
                 dadosGlobais = await res.json();
-                document.getElementById("loadingMsg").style.display = "none";
+
+                document.getElementById("loadingMsg")
+                    .style.display = "none";
+
                 renderizar();
+
             } catch (e) {
-                document.getElementById("loadingMsg").innerText = "Erro ao carregar dados. Verifique a conexão.";
-                console.error("Erro ao carregar dados", e);
+
+                console.error(e);
+
+                document.getElementById("loadingMsg")
+                    .innerText = "Erro ao carregar";
+
             }
         }
 
         function formatarData(dataBruta) {
+
             if (!dataBruta) return "";
+
             try {
+
                 const data = new Date(dataBruta);
+
                 return data.toLocaleString("pt-BR", {
-                    day: "2-digit", month: "2-digit", year: "numeric",
-                    hour: "2-digit", minute: "2-digit"
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
                 });
-            } catch { return dataBruta; }
+
+            } catch {
+
+                return dataBruta;
+
+            }
         }
 
         function renderizar() {
-            const nomeBusca = document.getElementById("buscaNome").value.toLowerCase();
-            const cpfBuscaLimpo = document.getElementById("buscaCPF").value.replace(/\D/g, "");
-            const dataBusca = document.getElementById("buscaData").value;
-            const statusFiltro = document.getElementById("filtroStatus").value;
 
-            const container = document.getElementById("lista");
+            const nomeBusca =
+                document.getElementById("buscaNome")
+                    .value.toLowerCase();
+
+            const cpfBusca =
+                document.getElementById("buscaCPF")
+                    .value.replace(/\D/g, "");
+
+            const protocoloBusca =
+                document.getElementById("buscaProtocolo")
+                    .value.toLowerCase();
+
+            const statusFiltro =
+                document.getElementById("filtroStatus")
+                    .value;
+
+            const dataBusca =
+                document.getElementById("buscaData")
+                    .value;
+
+            const container =
+                document.getElementById("lista");
+
             container.innerHTML = "";
 
-            let total = 0, pend = 0, sep = 0, ent = 0;
+            let total = 0;
+            let analise = 0;
+            let pend = 0;
+            let sep = 0;
+            let ent = 0;
 
             dadosGlobais.slice().reverse().forEach(item => {
-                const cpfItemLimpo = item.cpf ? String(item.cpf).replace(/\D/g, "") : "";
 
-                if (nomeBusca && (!item.nome || !item.nome.toLowerCase().includes(nomeBusca))) return;
-                if (cpfBuscaLimpo && !cpfItemLimpo.includes(cpfBuscaLimpo)) return;
-                if (statusFiltro && item.status !== statusFiltro) return;
-                if (dataBusca && (!item.data || !item.data.includes(dataBusca.split("-").reverse().join("/")))) return;
+                const cpfItem =
+                    item.cpf
+                        ? String(item.cpf).replace(/\D/g, "")
+                        : "";
+
+                if (
+                    nomeBusca &&
+                    (!item.nome ||
+                        !item.nome.toLowerCase()
+                            .includes(nomeBusca))
+                ) return;
+
+                if (
+                    cpfBusca &&
+                    !cpfItem.includes(cpfBusca)
+                ) return;
+
+                if (
+                    protocoloBusca &&
+                    (!item.protocolo ||
+                        !item.protocolo.toLowerCase()
+                            .includes(protocoloBusca))
+                ) return;
+
+                if (
+                    statusFiltro &&
+                    item.status !== statusFiltro
+                ) return;
+
+                if (
+                    dataBusca &&
+                    (!item.data ||
+                        !item.data.includes(
+                            dataBusca
+                                .split("-")
+                                .reverse()
+                                .join("/")
+                        ))
+                ) return;
 
                 total++;
-                if (item.status === "PENDENTE") pend++;
-                if (item.status === "SEPARADO") sep++;
-                if (item.status === "ENTREGUE") ent++;
 
-                const statusClass = item.status ? item.status.toLowerCase() : "";
+                if (item.status === "EM ANÁLISE")
+                    analise++;
 
-                if (tipoAtual === "materiais") {
-                    container.innerHTML += `
+                if (item.status === "PENDENTE")
+                    pend++;
+
+                if (item.status === "SEPARADO")
+                    sep++;
+
+                if (item.status === "ENTREGUE")
+                    ent++;
+
+                const statusClass =
+                    item.status
+                        ? item.status
+                            .toLowerCase()
+                            .replace(" ", "-")
+                        : "";
+
+                container.innerHTML += `
                 <div class="card">
-                    <div class="nome">${item.nome || ""}</div>
-                    <p class="dataPedido"><b>Data:</b> ${formatarData(item.data)}</p>
-                    <p><b>Cidade:</b> ${item.cidade || ""}</p>
-                    <p><b>Posto:</b> ${item.posto || ""}</p>
-                    <p><b>Material:</b> ${item.material || ""}</p>
-                    <p><b>Quantidade:</b> ${item.quantidade || ""}</p>
-                    <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
-                    ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
+
+                    <div class="nome">
+                        ${item.nome || ""}
+                    </div>
+
                     <p>
-                        ${item.foto ? `
-                      <p><b>Foto da Avaria:</b></p>
-                      <img src="${item.foto}" style="max-width:100%; border-radius:10px; margin-top:5px;">
-                      ` : ""}
-                        <b>Status:</b>
-                        <span class="status ${statusClass}">${item.status || ""}</span>
+                        <b>Protocolo:</b>
+                        ${item.protocolo || ""}
                     </p>
-                    <select class="statusSelect" onchange="alterar(${item.id}, this.value)">
-                        <option value="">Alterar Status</option>
-                        <option>PENDENTE</option>
-                        <option>SEPARADO</option>
-                        <option>ENTREGUE</option>
-                    </select>
-                </div>`;
-                } else {
-                    container.innerHTML += `
-                <div class="card">
-                    <div class="nome">${item.nome || ""}</div>
-                    <p class="dataPedido"><b>Data do Pedido:</b> ${formatarData(item.data)}</p>
-                    <p><b>CPF:</b> ${item.cpf || ""}</p>
-                    <p><b>Telefone:</b> ${item.telefone || ""}</p>
-                    <p><b>Posto:</b> ${item.posto || "Não informado"}</p>
-                    <p><b>Uniformes:</b><br>${item.uniformes || ""}</p>
-                    <p><b>Obs:</b> ${item.observacao || "Nenhuma"}</p>
-                    ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
+
+                    <p class="dataPedido">
+                        <b>Data:</b>
+                        ${formatarData(item.data)}
+                    </p>
+
                     <p>
-                        <b>Status:</b>
-                        <span class="status ${statusClass}">${item.status || ""}</span>
+                        <b>CPF:</b>
+                        ${item.cpf || ""}
                     </p>
-                    <select class="statusSelect" onchange="alterar(${item.id}, this.value)">
-                        <option value="">Alterar Status</option>
-                        <option>PENDENTE</option>
-                        <option>SEPARADO</option>
-                        <option>ENTREGUE</option>
+
+                    <p>
+                        <b>Telefone:</b>
+                        ${item.telefone || ""}
+                    </p>
+
+                    <p>
+                        <b>Posto:</b>
+                        ${item.posto || ""}
+                    </p>
+
+                    <p>
+                        <b>Uniformes:</b><br>
+                        ${item.uniformes || ""}
+                    </p>
+
+                    <p>
+                        <b>Obs:</b>
+                        ${item.observacao || "Nenhuma"}
+                    </p>
+
+                    ${
+                        item.assinatura
+                        ? `
+                        <img src="${item.assinatura}"
+                        class="assinatura">
+                        `
+                        : ""
+                    }
+
+                    ${
+                        item.fotos &&
+                        item.fotos.length > 0
+                        ? `
+                        <div style="margin-top:15px;">
+                            <b>Fotos da avaria:</b>
+
+                            <div class="fotosBox">
+
+                                ${item.fotos.map(f => `
+                                    <img src="${f}"
+                                    class="fotoAvaria">
+                                `).join("")}
+
+                            </div>
+                        </div>
+                        `
+                        : ""
+                    }
+
+                    <p style="margin-top:15px;">
+                        <b>Status:</b>
+
+                        <span class="status ${statusClass}">
+                            ${item.status || ""}
+                        </span>
+                    </p>
+
+                    <select class="statusSelect"
+                        onchange="alterar(${item.id}, this.value)">
+
+                        <option value="">
+                            Alterar Status
+                        </option>
+
+                        <option>
+                            EM ANÁLISE
+                        </option>
+
+                        <option>
+                            PENDENTE
+                        </option>
+
+                        <option>
+                            SEPARADO
+                        </option>
+
+                        <option>
+                            ENTREGUE
+                        </option>
+
                     </select>
-                </div>`;
-                }
+
+                </div>
+                `;
             });
 
-            document.getElementById("total").innerText = "Total: " + total;
-            document.getElementById("pendentes").innerText = "Pendentes: " + pend;
-            document.getElementById("separados").innerText = "Separados: " + sep;
-            document.getElementById("entregues").innerText = "Entregues: " + ent;
+            document.getElementById("total")
+                .innerText = "Total: " + total;
 
-            atualizarGrafico(pend, sep, ent);
+            document.getElementById("analise")
+                .innerText = "Em análise: " + analise;
+
+            document.getElementById("pendentes")
+                .innerText = "Pendentes: " + pend;
+
+            document.getElementById("separados")
+                .innerText = "Separados: " + sep;
+
+            document.getElementById("entregues")
+                .innerText = "Entregues: " + ent;
+
+            atualizarGrafico(
+                analise,
+                pend,
+                sep,
+                ent
+            );
+
+            atualizarRanking();
         }
 
-        function atualizarGrafico(pend, sep, ent) {
-            const ctx = document.getElementById("graficoStatus");
-            if (grafico) grafico.destroy();
+        function atualizarGrafico(
+            analise,
+            pend,
+            sep,
+            ent
+        ) {
+
+            const ctx =
+                document.getElementById("graficoStatus");
+
+            if (grafico)
+                grafico.destroy();
+
             grafico = new Chart(ctx, {
+
                 type: "pie",
+
                 data: {
-                    labels: ["Pendentes", "Separados", "Entregues"],
+
+                    labels: [
+                        "Em análise",
+                        "Pendentes",
+                        "Separados",
+                        "Entregues"
+                    ],
+
                     datasets: [{
-                        data: [pend, sep, ent],
-                        backgroundColor: ["#facc15", "#3b82f6", "#22c55e"]
+
+                        data: [
+                            analise,
+                            pend,
+                            sep,
+                            ent
+                        ],
+
+                        backgroundColor: [
+                            "#f97316",
+                            "#facc15",
+                            "#3b82f6",
+                            "#22c55e"
+                        ]
                     }]
                 },
-                options: { plugins: { legend: { labels: { color: "white" } } } }
+
+                options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: "white"
+                            }
+                        }
+                    }
+                }
             });
         }
 
-        // ✅ FIX 3: agora passa o tipoAtual para a função alterar, garantindo que
-        // materiais atualizem na Página2 e uniformes na Página1
+        function atualizarRanking() {
+
+            const ranking = {};
+
+            dadosGlobais.forEach(item => {
+
+                if (!item.nome) return;
+
+                ranking[item.nome] =
+                    (ranking[item.nome] || 0) + 1;
+            });
+
+            const top = Object.entries(ranking)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            document.getElementById(
+                "rankingFuncionarios"
+            ).innerHTML = top.map((r, i) => `
+
+                <div class="rankingItem">
+
+                    ${i + 1}.
+                    <b>${r[0]}</b>
+
+                    <br>
+
+                    ${r[1]} solicitações
+
+                </div>
+
+            `).join("");
+        }
+
         async function alterar(id, status) {
+
             if (!status) return;
-            await fetch(`${URL_SCRIPT}?func=atualizarStatus&id=${id}&status=${status}&tipo=${tipoAtual}`);
+
+            await fetch(
+                `${URL_SCRIPT}?func=atualizarStatus&id=${id}&status=${status}&tipo=${tipoAtual}`
+            );
+
             carregar();
         }
 
-        document.getElementById("buscaNome").oninput = renderizar;
-        document.getElementById("buscaCPF").oninput = renderizar;
-        document.getElementById("buscaData").onchange = renderizar;
-        document.getElementById("filtroStatus").onchange = renderizar;
+        async function exportarPDF(statusFiltro) {
+
+            const { jsPDF } = window.jspdf;
+
+            const pdf = new jsPDF();
+
+            pdf.setFontSize(18);
+
+            pdf.text(
+                `RELATÓRIO ${statusFiltro}`,
+                20,
+                20
+            );
+
+            let y = 35;
+
+            const itens = dadosGlobais.filter(
+                item => item.status === statusFiltro
+            );
+
+            itens.forEach((item, i) => {
+
+                pdf.setFontSize(12);
+
+                pdf.text(
+                    `${i + 1}. ${item.nome}`,
+                    20,
+                    y
+                );
+
+                y += 7;
+
+                pdf.text(
+                    `Protocolo: ${item.protocolo || ""}`,
+                    20,
+                    y
+                );
+
+                y += 7;
+
+                pdf.text(
+                    `Posto: ${item.posto || ""}`,
+                    20,
+                    y
+                );
+
+                y += 7;
+
+                const texto =
+                    pdf.splitTextToSize(
+                        `Uniformes: ${item.uniformes || ""}`,
+                        170
+                    );
+
+                pdf.text(texto, 20, y);
+
+                y += texto.length * 7;
+
+                y += 10;
+
+                if (y > 260) {
+
+                    pdf.addPage();
+
+                    y = 20;
+                }
+            });
+
+            pdf.save(
+                `uniformes_${statusFiltro}.pdf`
+            );
+        }
+
+        document.getElementById("buscaNome")
+            .oninput = renderizar;
+
+        document.getElementById("buscaCPF")
+            .oninput = renderizar;
+
+        document.getElementById("buscaProtocolo")
+            .oninput = renderizar;
+
+        document.getElementById("filtroStatus")
+            .onchange = renderizar;
+
+        document.getElementById("buscaData")
+            .onchange = renderizar;
 
         setInterval(carregar, 30000);
+
         carregar();
+
     </script>
 
 </body>
