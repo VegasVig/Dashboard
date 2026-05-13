@@ -740,6 +740,26 @@
                 20,
                 20
             );
+            dadosGlobais = dadosGlobais.map(item => {
+
+    // suporte para "foto" ou "fotos"
+    let fotosTemp = item.fotos || item.foto || "";
+
+    // transforma string em array
+    if (typeof fotosTemp === "string") {
+
+        fotosTemp = fotosTemp
+            .split(" | ")
+            .filter(f => f.trim() !== "");
+
+    }
+
+    item.fotos = Array.isArray(fotosTemp)
+        ? fotosTemp
+        : [];
+
+    return item;
+});
 
             let y = 35;
 
