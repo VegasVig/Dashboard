@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNIFORMES Vegas</title>
+    <title>UNIFORMESVegas</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
             font-family: 'Segoe UI', Arial;
@@ -39,11 +40,10 @@
             background: #000;
             color: white;
             min-width: 180px;
-            box-sizing: border-box;
         }
 
-        button { cursor: pointer; transition: .3s; }
-        button:hover { background: #222; }
+        button { cursor: pointer; transition: .2s; }
+        button:hover { background: #1a1a1a; }
 
         .stats {
             display: flex;
@@ -92,34 +92,87 @@
             color: #fff;
         }
 
-        .status {
-            padding: 6px 12px;
+        /* ── Badge de status ── */
+        .badge {
+            display: inline-block;
+            padding: 5px 13px;
             border-radius: 8px;
             font-weight: bold;
+            font-size: 13px;
+        }
+        .badge-em-analise { background: #f97316; color: #fff; }
+        .badge-pendente   { background: #facc15; color: #000; }
+        .badge-separado   { background: #3b82f6; color: #fff; }
+        .badge-entregue   { background: #22c55e; color: #000; }
+
+        /* ── Dropdown de status ── */
+        .statusWrap {
+            position: relative;
+            display: inline-block;
+            margin-top: 12px;
         }
 
-        .em-analise { background: #f97316; color: white; }
-        .pendente   { background: #facc15; color: black; }
-        .separado   { background: #3b82f6; }
-        .entregue   { background: #22c55e; color: black; }
-
-        .assinatura {
-            margin-top: 10px;
-            background: white;
-            border-radius: 10px;
-            max-width: 260px;
-        }
-
-        .fotoAvaria {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            margin-top: 10px;
-            object-fit: cover;
+        .statusWrap .badge {
             cursor: pointer;
+            user-select: none;
+            padding-right: 22px;
         }
 
+        .statusWrap .badge::after {
+            content: " ▾";
+            font-size: 11px;
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .statusMenu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 100;
+            min-width: 160px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.7);
+        }
+
+        .statusMenu.aberto { display: block; }
+
+        .statusMenu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            color: #e5e5e5;
+            font-size: 13px;
+            font-weight: bold;
+            min-width: unset;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .statusMenu button:hover { background: #2a2a2a; }
+
+        .statusMenu button.opt-em-analise { color: #f97316; }
+        .statusMenu button.opt-pendente   { color: #facc15; }
+        .statusMenu button.opt-separado   { color: #3b82f6; }
+        .statusMenu button.opt-entregue   { color: #22c55e; }
+
+        .statusMenu button.atual {
+            background: #2a2a2a;
+            opacity: .5;
+            pointer-events: none;
+        }
+
+        /* ── Fotos ── */
         .fotosBox {
             display: flex;
             flex-wrap: wrap;
@@ -127,6 +180,27 @@
             margin-top: 10px;
         }
 
+        .fotoAvaria {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid #333;
+            cursor: pointer;
+            transition: transform .2s;
+        }
+
+        .fotoAvaria:hover { transform: scale(1.06); }
+
+        .assinatura {
+            display: block;
+            margin-top: 10px;
+            background: white;
+            border-radius: 10px;
+            max-width: 240px;
+        }
+
+        /* ── Toggle tipo ── */
         .tipoToggle {
             display: flex;
             justify-content: center;
@@ -151,103 +225,68 @@
             border: 1px solid #2a2a2a;
         }
 
-        /* ── Botões de mudança de status ── */
-        .statusBtns {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .statusBtns button {
-            min-width: unset;
-            padding: 6px 12px;
-            font-size: 13px;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity .2s, transform .1s;
-        }
-
-        .statusBtns button:hover { opacity: .8; }
-        .statusBtns button:active { transform: scale(.96); }
-
-        .btn-analise  { background: #f97316; color: white; }
-        .btn-pendente { background: #facc15; color: black; }
-        .btn-separado { background: #3b82f6; color: white; }
-        .btn-entregue { background: #22c55e; color: black; }
-
-        .btn-atualizando {
-            opacity: .5;
-            pointer-events: none;
-        }
-
-        /* ── Modal de foto ampliada ── */
+        /* ── Modal ── */
         #modalFoto {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,.85);
+            background: rgba(0,0,0,.9);
             z-index: 9999;
             justify-content: center;
             align-items: center;
         }
-
         #modalFoto.aberto { display: flex; }
-
         #modalFoto img {
-            max-width: 90vw;
-            max-height: 90vh;
+            max-width: 92vw;
+            max-height: 92vh;
             border-radius: 12px;
-            box-shadow: 0 0 40px black;
         }
-
-        #modalFoto span {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            font-size: 36px;
+        #modalFoto .fechar {
+            position: fixed;
+            top: 16px; right: 24px;
+            font-size: 40px;
             cursor: pointer;
-            color: white;
+            color: #fff;
+            user-select: none;
+            line-height: 1;
         }
 
         /* ── Toast ── */
         #toast {
             position: fixed;
-            bottom: 30px;
+            bottom: 28px;
             left: 50%;
             transform: translateX(-50%);
             background: #333;
-            color: white;
-            padding: 12px 24px;
+            color: #fff;
+            padding: 11px 24px;
             border-radius: 10px;
             font-weight: bold;
+            font-size: 14px;
             opacity: 0;
             pointer-events: none;
             transition: opacity .3s;
             z-index: 9999;
+            white-space: nowrap;
         }
-
         #toast.visivel { opacity: 1; }
     </style>
 </head>
-
 <body>
+
+<!-- Modal foto -->
+<div id="modalFoto" onclick="fecharModal()">
+    <span class="fechar">✕</span>
+    <img id="modalImg" src="" onclick="event.stopPropagation()">
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
 
 <header>
     <img src="assets/vegaslogo.jpg" class="logo">
     <h2>UNIFORMES E MATERIAIS VEGAS VIGILÂNCIA</h2>
 </header>
-
-<!-- Modal de foto ampliada -->
-<div id="modalFoto" onclick="fecharModal()">
-    <span onclick="fecharModal()">✕</span>
-    <img id="modalImg" src="" alt="Foto ampliada">
-</div>
-
-<!-- Toast de feedback -->
-<div id="toast"></div>
 
 <div class="tipoToggle">
     <button id="btnUniformes" class="ativo" onclick="trocarTipo('uniformes')">Uniformes</button>
@@ -269,10 +308,10 @@
 
 <div class="stats">
     <div class="stat" id="total">Total: 0</div>
-    <div class="stat" id="analise"   style="color:#f97316">Em análise: 0</div>
-    <div class="stat" id="pendentes" style="color:#facc15">Pendentes: 0</div>
-    <div class="stat" id="separados" style="color:#3b82f6">Separados: 0</div>
-    <div class="stat" id="entregues" style="color:#22c55e">Entregues: 0</div>
+    <div class="stat" id="stAnalise"   style="color:#f97316">Em análise: 0</div>
+    <div class="stat" id="stPendentes" style="color:#facc15">Pendentes: 0</div>
+    <div class="stat" id="stSeparados" style="color:#3b82f6">Separados: 0</div>
+    <div class="stat" id="stEntregues" style="color:#22c55e">Entregues: 0</div>
 </div>
 
 <div class="tipoToggle">
@@ -295,301 +334,294 @@
 <div class="container" id="lista"></div>
 
 <script>
-
 let dadosGlobais = [];
 let tipoAtual    = "uniformes";
 let grafico;
+let menuAberto   = null; // referência ao menu dropdown aberto
 
-const URL_SCRIPT =
-    "https://script.google.com/macros/s/AKfycbz_8_8plCckKGKxL5Q32RCCx6rbkNynz_9zNC-hLsfXD8LKZtSwq1pkndOAWBD5KDxbow/exec";
 
-/* ═══════════════════════════════════════
-   MODAL DE FOTO AMPLIADA
-═══════════════════════════════════════ */
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxoJ3ssPd7p4r52ceftgyZkAMZr8DMT9MIeS2nteEjQVMw77OAHmIPs15ylOFIR9XQhQw/exec";
+
+/* ── Fecha dropdown ao clicar fora ── */
+document.addEventListener("click", () => {
+    if (menuAberto) {
+        menuAberto.classList.remove("aberto");
+        menuAberto = null;
+    }
+});
+
+/* ── Modal ── */
 function abrirModal(src) {
     document.getElementById("modalImg").src = src;
     document.getElementById("modalFoto").classList.add("aberto");
 }
-
 function fecharModal() {
     document.getElementById("modalFoto").classList.remove("aberto");
-    document.getElementById("modalImg").src = "";
 }
 
-/* ═══════════════════════════════════════
-   TOAST
-═══════════════════════════════════════ */
-function mostrarToast(msg, cor = "#333") {
+/* ── Toast ── */
+let _tt;
+function toast(msg, cor = "#333") {
+    clearTimeout(_tt);
     const t = document.getElementById("toast");
-    t.textContent  = msg;
+    t.textContent = msg;
     t.style.background = cor;
     t.classList.add("visivel");
-    setTimeout(() => t.classList.remove("visivel"), 2800);
+    _tt = setTimeout(() => t.classList.remove("visivel"), 3000);
 }
 
-/* ═══════════════════════════════════════
-   TROCAR TIPO
-═══════════════════════════════════════ */
+/* ── Tipo ── */
 function trocarTipo(tipo) {
     tipoAtual = tipo;
-    document.getElementById("btnUniformes").classList.remove("ativo");
-    document.getElementById("btnMateriais").classList.remove("ativo");
-    document.getElementById(tipo === "uniformes" ? "btnUniformes" : "btnMateriais")
-            .classList.add("ativo");
+    document.getElementById("btnUniformes").classList.toggle("ativo", tipo === "uniformes");
+    document.getElementById("btnMateriais").classList.toggle("ativo", tipo === "materiais");
     carregar();
 }
 
-/* ═══════════════════════════════════════
-   CARREGAR DADOS
-═══════════════════════════════════════ */
+/* ── Carregar ── */
 async function carregar() {
     document.getElementById("loadingMsg").style.display = "block";
-
+    document.getElementById("lista").innerHTML = "";
     try {
-        const res = await fetch(`${URL_SCRIPT}?tipo=${tipoAtual}`);
-        dadosGlobais = await res.json();
-
-        // Normaliza o campo fotos
-        dadosGlobais = dadosGlobais.map(item => {
-
-            // fotos (array de base64 – uniformes)
-            if (item.fotos && typeof item.fotos === "string") {
-                try { item.fotos = JSON.parse(item.fotos); }
-                catch { item.fotos = []; }
+        const res  = await fetch(`${URL_SCRIPT}?tipo=${tipoAtual}`);
+        const json = await res.json();
+        dadosGlobais = json.map(item => {
+            if (typeof item.fotos === "string") {
+                try { item.fotos = JSON.parse(item.fotos); } catch { item.fotos = []; }
             }
             if (!Array.isArray(item.fotos)) item.fotos = [];
-
-            // foto singular (materiais) – já vem como string base64, ok.
-
             return item;
         });
-
-    } catch (e) {
-        mostrarToast("Erro ao carregar dados!", "#ef4444");
+    } catch(err) {
+        toast("Erro ao carregar!", "#ef4444");
+        console.error(err);
     }
-
     document.getElementById("loadingMsg").style.display = "none";
     renderizar();
 }
 
-/* ═══════════════════════════════════════
-   RENDERIZAR CARDS
-═══════════════════════════════════════ */
+/* ── Renderizar ── */
 function renderizar() {
+    const busca    = document.getElementById("buscaNome").value.toLowerCase();
+    const buscaCPF = document.getElementById("buscaCPF").value.toLowerCase();
+    const buscaProt= document.getElementById("buscaProtocolo").value.toLowerCase();
+    const filtroSts= document.getElementById("filtroStatus").value;
+    const lista    = document.getElementById("lista");
+    lista.innerHTML = "";
 
-    const busca      = document.getElementById("buscaNome").value.toLowerCase();
-    const buscaCPF   = document.getElementById("buscaCPF").value.toLowerCase();
-    const buscaProt  = document.getElementById("buscaProtocolo").value.toLowerCase();
-    const filtroSts  = document.getElementById("filtroStatus").value;
+    let total=0, analise=0, pend=0, sep=0, ent=0;
 
-    const container  = document.getElementById("lista");
-    container.innerHTML = "";
-
-    let total = 0, analise = 0, pend = 0, sep = 0, ent = 0;
-
-    // Filtra e exibe na ordem inversa (mais recentes primeiro)
-    dadosGlobais.slice().reverse().forEach((item, idx) => {
-
-        // ── Filtros de busca ──
-        if (busca    && !(item.nome      || "").toLowerCase().includes(busca))    return;
-        if (buscaCPF && !(item.cpf       || "").toLowerCase().includes(buscaCPF)) return;
-        if (buscaProt&& !(item.protocolo || "").toLowerCase().includes(buscaProt))return;
+    dadosGlobais.slice().reverse().forEach(item => {
+        if (busca    && !(item.nome      ||"").toLowerCase().includes(busca))    return;
+        if (buscaCPF && !(item.cpf       ||"").toLowerCase().includes(buscaCPF)) return;
+        if (buscaProt&& !(item.protocolo ||"").toLowerCase().includes(buscaProt))return;
         if (filtroSts && item.status !== filtroSts) return;
 
         total++;
-        if (item.status === "EM ANÁLISE") analise++;
-        if (item.status === "PENDENTE")   pend++;
-        if (item.status === "SEPARADO")   sep++;
-        if (item.status === "ENTREGUE")   ent++;
+        if (item.status==="EM ANÁLISE") analise++;
+        if (item.status==="PENDENTE")   pend++;
+        if (item.status==="SEPARADO")   sep++;
+        if (item.status==="ENTREGUE")   ent++;
 
-        // índice real no array original (para atualizar depois)
-        const idxReal = dadosGlobais.length - 1 - idx;
-
-        const statusClass = item.status.toLowerCase().replace(" ", "-").replace("á","a").replace("é","e");
-
-        // ── Bloco de fotos ──
-        const fotosHtml = (() => {
-            if (tipoAtual === "materiais") {
-                if (!item.foto) return "";
-                return `<div class="fotosBox">
-                    <img src="${item.foto}" class="fotoAvaria"
-                         onclick="abrirModal('${item.foto.replace(/'/g,"\\'")}')">
-                </div>`;
-            } else {
-                if (!item.fotos || item.fotos.length === 0) return "";
-                return `<div class="fotosBox">
-                    ${item.fotos.map(f => `
-                        <img src="${f}" class="fotoAvaria"
-                             onclick="abrirModal('${f.replace(/'/g,"\\'")}')">
-                    `).join("")}
-                </div>`;
-            }
-        })();
-
-        // ── Botões de status ──
-        const statusBtns = `
-        <div class="statusBtns">
-            <span style="align-self:center;font-size:13px;margin-right:4px;">Alterar:</span>
-            <button class="btn-analise"  onclick="alterarStatus(${idxReal}, 'EM ANÁLISE', this)">EM ANÁLISE</button>
-            <button class="btn-pendente" onclick="alterarStatus(${idxReal}, 'PENDENTE',   this)">PENDENTE</button>
-            <button class="btn-separado" onclick="alterarStatus(${idxReal}, 'SEPARADO',   this)">SEPARADO</button>
-            <button class="btn-entregue" onclick="alterarStatus(${idxReal}, 'ENTREGUE',   this)">ENTREGUE</button>
-        </div>`;
-
-        // ── Card de MATERIAIS ──
-        if (tipoAtual === "materiais") {
-            container.innerHTML += `
-            <div class="card" id="card-${idxReal}">
-                <div class="nome">${item.nome || ""}</div>
-                <p><b>Protocolo:</b> ${item.protocolo || ""}</p>
-                <p><b>Posto:</b>     ${item.posto     || ""}</p>
-                <p><b>Material:</b>  ${item.material  || ""}</p>
-                <p><b>Quantidade:</b>${item.quantidade|| ""}</p>
-                <p><b>Obs:</b>       ${item.obs       || ""}</p>
-                ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
-                ${fotosHtml}
-                <p><b>Status:</b> <span class="status ${statusClass}">${item.status}</span></p>
-                ${statusBtns}
-            </div>`;
-
-        // ── Card de UNIFORMES ──
-        } else {
-            container.innerHTML += `
-            <div class="card" id="card-${idxReal}">
-                <div class="nome">${item.nome || ""}</div>
-                <p><b>Protocolo:</b> ${item.protocolo || ""}</p>
-                <p><b>CPF:</b>       ${item.cpf       || ""}</p>
-                <p><b>Telefone:</b>  ${item.telefone  || ""}</p>
-                <p><b>Posto:</b>     ${item.posto     || ""}</p>
-                <p><b>Uniformes:</b><br>${item.uniformes || ""}</p>
-                ${item.assinatura ? `<img src="${item.assinatura}" class="assinatura">` : ""}
-                ${fotosHtml}
-                <p><b>Status:</b> <span class="status ${statusClass}">${item.status}</span></p>
-                ${statusBtns}
-            </div>`;
-        }
+        const div = document.createElement("div");
+        div.className = "card";
+        div.id = `card-${item.id}`;
+        div.innerHTML = montarCard(item);
+        lista.appendChild(div);
     });
 
-    document.getElementById("total").innerText     = "Total: "      + total;
-    document.getElementById("analise").innerText   = "Em análise: " + analise;
-    document.getElementById("pendentes").innerText = "Pendentes: "  + pend;
-    document.getElementById("separados").innerText = "Separados: "  + sep;
-    document.getElementById("entregues").innerText = "Entregues: "  + ent;
+    document.getElementById("total").innerText       = "Total: "      + total;
+    document.getElementById("stAnalise").innerText   = "Em análise: " + analise;
+    document.getElementById("stPendentes").innerText = "Pendentes: "  + pend;
+    document.getElementById("stSeparados").innerText = "Separados: "  + sep;
+    document.getElementById("stEntregues").innerText = "Entregues: "  + ent;
 
     atualizarGrafico(analise, pend, sep, ent);
     atualizarRanking();
 }
 
-/* ═══════════════════════════════════════
-   ALTERAR STATUS  ←  NOVO
-═══════════════════════════════════════ */
-async function alterarStatus(idxReal, novoStatus, btnClicado) {
+/* ── Montar card ── */
+function montarCard(item) {
+    const badgeClass = {
+        "EM ANÁLISE": "badge-em-analise",
+        "PENDENTE":   "badge-pendente",
+        "SEPARADO":   "badge-separado",
+        "ENTREGUE":   "badge-entregue"
+    }[item.status] || "badge-em-analise";
 
-    const item = dadosGlobais[idxReal];
-    if (!item) return;
+    // Opções do dropdown (exceto o status atual)
+    const opcoes = [
+        ["EM ANÁLISE","opt-em-analise"],
+        ["PENDENTE",  "opt-pendente"],
+        ["SEPARADO",  "opt-separado"],
+        ["ENTREGUE",  "opt-entregue"]
+    ].map(([s, cls]) => `
+        <button class="${cls}${item.status===s?' atual':''}"
+                onclick="alterarStatus(${item.id},'${s}',event)">
+            ${s}${item.status===s?' ✓':''}
+        </button>
+    `).join("");
 
-    // Desabilita todos os botões do card durante a requisição
-    const card = document.getElementById(`card-${idxReal}`);
-    const botoes = card.querySelectorAll(".statusBtns button");
-    botoes.forEach(b => b.classList.add("btn-atualizando"));
+    const dropdown = `
+        <div class="statusWrap">
+            <span class="badge ${badgeClass}"
+                  onclick="toggleMenu(${item.id}, event)">
+                ${item.status}
+            </span>
+            <div class="statusMenu" id="menu-${item.id}">
+                ${opcoes}
+            </div>
+        </div>`;
 
-    mostrarToast("Atualizando...", "#555");
+    // Fotos
+    let fotosHtml = "";
+    if (tipoAtual === "materiais" && item.foto && item.foto.length > 10) {
+        fotosHtml = `<div class="fotosBox">
+            <img src="${item.foto}" class="fotoAvaria" onclick="abrirModal(this.src)">
+        </div>`;
+    } else if (tipoAtual === "uniformes" && item.fotos && item.fotos.length > 0) {
+        fotosHtml = `<div class="fotosBox">
+            ${item.fotos.map(f => `<img src="${f}" class="fotoAvaria" onclick="abrirModal(this.src)">`).join("")}
+        </div>`;
+    }
+
+    const ass = item.assinatura && item.assinatura.length > 10
+        ? `<img src="${item.assinatura}" class="assinatura">` : "";
+
+    if (tipoAtual === "materiais") {
+        return `
+            <div class="nome">${item.nome||""}</div>
+            <p><b>Protocolo:</b>  ${item.protocolo ||""}</p>
+            <p><b>Cidade:</b>     ${item.cidade    ||""}</p>
+            <p><b>Posto:</b>      ${item.posto     ||""}</p>
+            <p><b>Material:</b>   ${item.material  ||""}</p>
+            <p><b>Quantidade:</b> ${item.quantidade||""}</p>
+            <p><b>Obs:</b>        ${item.observacao||""}</p>
+            ${ass}${fotosHtml}
+            <p><b>Status:</b> ${dropdown}</p>`;
+    }
+
+    return `
+        <div class="nome">${item.nome||""}</div>
+        <p><b>Protocolo:</b> ${item.protocolo ||""}</p>
+        <p><b>CPF:</b>       ${item.cpf       ||""}</p>
+        <p><b>Telefone:</b>  ${item.telefone  ||""}</p>
+        <p><b>Posto:</b>     ${item.posto     ||""}</p>
+        <p><b>Uniformes:</b><br>${item.uniformes||""}</p>
+        <p><b>Obs:</b>       ${item.observacao||""}</p>
+        ${ass}${fotosHtml}
+        <p><b>Status:</b> ${dropdown}</p>`;
+}
+
+/* ── Toggle do dropdown ── */
+function toggleMenu(id, event) {
+    event.stopPropagation();
+    const menu = document.getElementById(`menu-${id}`);
+    if (menuAberto && menuAberto !== menu) {
+        menuAberto.classList.remove("aberto");
+    }
+    menu.classList.toggle("aberto");
+    menuAberto = menu.classList.contains("aberto") ? menu : null;
+}
+
+/* ── Alterar status via GET (igual ao seu doGet) ── */
+async function alterarStatus(id, novoStatus, event) {
+    event.stopPropagation();
+
+    const item = dadosGlobais.find(i => i.id === id);
+    if (!item || item.status === novoStatus) return;
+
+    // Fecha menu
+    if (menuAberto) { menuAberto.classList.remove("aberto"); menuAberto = null; }
+
+    toast("Salvando...", "#555");
+
+    // Otimista: atualiza na tela antes da resposta
+    item.status = novoStatus;
+    const card = document.getElementById(`card-${id}`);
+    if (card) card.innerHTML = montarCard(item);
+    atualizarContadores();
 
     try {
-        const body = {
-            tipo:      tipoAtual,
-            protocolo: item.protocolo,
-            status:    novoStatus
-        };
-
-        const res = await fetch(URL_SCRIPT, {
-            method: "POST",
-            // O Apps Script recebe via e.postData.contents
-            body: JSON.stringify(body)
-        });
-
+        const url = `${URL_SCRIPT}?func=atualizarStatus&tipo=${tipoAtual}&id=${id}&status=${encodeURIComponent(novoStatus)}`;
+        const res  = await fetch(url);
         const json = await res.json();
 
-        if (json.ok) {
-            // Atualiza localmente sem recarregar tudo
-            item.status = novoStatus;
-            mostrarToast(`Status alterado para ${novoStatus}!`, "#22c55e");
-            renderizar();
+        if (json.sucesso) {
+            toast("✓ " + novoStatus, "#22c55e");
         } else {
-            mostrarToast("Erro: " + (json.erro || "falha desconhecida"), "#ef4444");
-            botoes.forEach(b => b.classList.remove("btn-atualizando"));
+            throw new Error(json.erro || json.mensagem || "Erro desconhecido");
         }
-
-    } catch (e) {
-        mostrarToast("Erro de conexão!", "#ef4444");
-        botoes.forEach(b => b.classList.remove("btn-atualizando"));
+    } catch(err) {
+        // Reverte em caso de erro
+        toast("Erro: " + err.message, "#ef4444");
+        // Recarrega do servidor para garantir consistência
+        carregar();
     }
 }
 
-/* ═══════════════════════════════════════
-   GRÁFICO
-═══════════════════════════════════════ */
-function atualizarGrafico(analise, pend, sep, ent) {
+/* ── Contadores ── */
+function atualizarContadores() {
+    const filtroSts = document.getElementById("filtroStatus").value;
+    let total=0, analise=0, pend=0, sep=0, ent=0;
+    dadosGlobais.forEach(item => {
+        if (filtroSts && item.status !== filtroSts) return;
+        total++;
+        if (item.status==="EM ANÁLISE") analise++;
+        if (item.status==="PENDENTE")   pend++;
+        if (item.status==="SEPARADO")   sep++;
+        if (item.status==="ENTREGUE")   ent++;
+    });
+    document.getElementById("total").innerText       = "Total: "      + total;
+    document.getElementById("stAnalise").innerText   = "Em análise: " + analise;
+    document.getElementById("stPendentes").innerText = "Pendentes: "  + pend;
+    document.getElementById("stSeparados").innerText = "Separados: "  + sep;
+    document.getElementById("stEntregues").innerText = "Entregues: "  + ent;
+    atualizarGrafico(analise, pend, sep, ent);
+    atualizarRanking();
+}
+
+/* ── Gráfico ── */
+function atualizarGrafico(a, p, s, e) {
     const ctx = document.getElementById("graficoStatus");
     if (grafico) grafico.destroy();
     grafico = new Chart(ctx, {
         type: "pie",
         data: {
             labels: ["Em análise","Pendentes","Separados","Entregues"],
-            datasets: [{
-                data: [analise, pend, sep, ent],
-                backgroundColor: ["#f97316","#facc15","#3b82f6","#22c55e"]
-            }]
+            datasets: [{ data: [a,p,s,e],
+                backgroundColor: ["#f97316","#facc15","#3b82f6","#22c55e"] }]
         }
     });
 }
 
-/* ═══════════════════════════════════════
-   RANKING
-═══════════════════════════════════════ */
+/* ── Ranking ── */
 function atualizarRanking() {
-    const ranking = {};
-    dadosGlobais.forEach(item => {
-        if (!item.nome) return;
-        ranking[item.nome] = (ranking[item.nome] || 0) + 1;
-    });
-
-    const top = Object.entries(ranking)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10);
-
+    const r = {};
+    dadosGlobais.forEach(i => { if (i.nome) r[i.nome] = (r[i.nome]||0)+1; });
+    const top = Object.entries(r).sort((a,b)=>b[1]-a[1]).slice(0,10);
     document.getElementById("rankingFuncionarios").innerHTML =
-        top.map((r, i) => `
-            <div class="rankingItem">
-                ${i + 1}. <b>${r[0]}</b><br>${r[1]} solicitações
-            </div>
-        `).join("");
+        top.map((x,i)=>`<div class="rankingItem">${i+1}. <b>${x[0]}</b><br>${x[1]} solicitações</div>`).join("");
 }
 
-/* ═══════════════════════════════════════
-   EXPORTAR PDF
-═══════════════════════════════════════ */
+/* ── PDF ── */
 async function exportarPDF(statusFiltro) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
     pdf.setFontSize(18);
     pdf.text(`RELATÓRIO ${statusFiltro}`, 20, 20);
     let y = 35;
-
-    dadosGlobais.filter(i => i.status === statusFiltro).forEach((item, i) => {
+    dadosGlobais.filter(i=>i.status===statusFiltro).forEach((item,i)=>{
         pdf.setFontSize(12);
-        pdf.text(`${i + 1}. ${item.nome}`, 20, y);       y += 7;
-        pdf.text(`Protocolo: ${item.protocolo || ""}`, 20, y); y += 7;
-        pdf.text(`Posto: ${item.posto || ""}`, 20, y);    y += 15;
-        if (y > 260) { pdf.addPage(); y = 20; }
+        pdf.text(`${i+1}. ${item.nome||""}`,       20, y); y+=7;
+        pdf.text(`Protocolo: ${item.protocolo||""}`,20, y); y+=7;
+        pdf.text(`Posto: ${item.posto||""}`,        20, y); y+=15;
+        if (y>260) { pdf.addPage(); y=20; }
     });
-
     pdf.save(`uniformes_${statusFiltro}.pdf`);
 }
 
-/* ── Iniciar ── */
 carregar();
-
 </script>
 </body>
 </html>
