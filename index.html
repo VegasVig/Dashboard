@@ -401,21 +401,98 @@ function atualizarRanking() {
         || "<p style='color:#888'>Nenhum dado.</p>";
 }
 
-/* ── PDF ── */
+/* ── PDF Otimizado (Sem assinaturas/fotos, apenas os dados solicitados) ── */
 async function exportarPDF(statusFiltro) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
-    pdf.setFontSize(18);
-    pdf.text(`RELATÓRIO ${statusFiltro}`, 20, 20);
-    let y = 35;
-    dadosGlobais.filter(i => i.status === statusFiltro).forEach((item, i) => {
+    
+    // Configurações iniciais do PDF
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(16);
+    
+    const tituloTipo = tipoAtual === "uniformes" ? "UNIFORMES" : "MATERIAIS";
+    pdf.text(`RELATÓRIO DE ${tituloTipo} - STATUS: ${statusFiltro}`, 14, 20);
+    
+    // Data de emissão do relatório
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+    const dataAtual = new Date().toLocaleDateString('pt-BR');
+    pdf.text(`Emitido em: ${dataAtual}`, 14, 27);
+    
+    // Linha divisória do cabeçalho
+    pdf.setDrawColor(200, 200, 200);
+    pdf.line(14, 30, 196, 30);
+    
+    let y = 38; // Posição vertical inicial para os dados
+    const limitePagina = 275; // Margem de segurança inferior
+    
+    // Filtra os dados atuais pelo status clicado
+    const itensFiltrados = dadosGlobais.filter(i => i.status === statusFiltro);
+    
+    if (itensFiltrados.length === 0) {
         pdf.setFontSize(12);
-        pdf.text(`${i+1}. ${item.nome||""}`,        20, y); y+=7;
-        pdf.text(`Protocolo: ${item.protocolo||""}`, 20, y); y+=7;
-        pdf.text(`Posto: ${item.posto||""}`,         20, y); y+=15;
-        if (y > 260) { pdf.addPage(); y = 20; }
+        pdf.text("Nenhum registro encontrado para este status.", 14, y);
+        pdf.save(`relatorio_${tipoAtual}_${statusFiltro}.pdf`);
+        return;
+    }
+
+    itensFiltrados.forEach((item, index) => {
+        // Verifica se o bloco de dados atual vai estourar o limite da página
+        // Estimando ~35mm de altura para cada bloco de funcionário com os textos quebrados
+        if (y + 35 > limitePagina) {
+            pdf.addPage();
+            y = 20; // Reinicia o topo na nova página
+        }
+        
+        // Estilo do Bloco/Nome do funcionário
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(12);
+        pdf.text(`${index + 1}. ${item.nome || "Não informado"}`, 14, y);
+        y += 6;
+        
+        // Detalhes do item (Texto normal)
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(10);
+        
+        // Cidade e Posto
+        const cidadeTxt = item.cidade || "Não informada";
+        const postoTxt = item.posto || "Não informado";
+        pdf.text(`Cidade: ${cidadeTxt}   |   Posto: ${postoTxt}`, 14, y);
+        y += 6;
+        
+        // Exibição dos itens solicitados dependendo da aba ativa
+        if (tipoAtual === "uniformes") {
+            pdf.setFont("helvetica", "bold");
+            pdf.text("Uniformes Solicitados:", 14, y);
+            pdf.setFont("helvetica", "normal");
+            y += 5;
+            
+            // Trata quebras de linha caso o texto de uniformes seja muito longo
+            const textoUniformes = item.uniformes || "Nenhum uniforme listado";
+            const linhasUniformes = pdf.splitTextToSize(textoUniformes, 180);
+            
+            linhasUniformes.forEach(linha => {
+                if (y > limitePagina) { pdf.addPage(); y = 20; }
+                pdf.text(linha, 14, y);
+                y += 5;
+            });
+        } else {
+            // Se for Materiais
+            const materialTxt = item.material || "Não informado";
+            const qtdTxt = item.quantidade || "0";
+            pdf.text(`Material: ${materialTxt}  (Qtd: ${qtdTxt})`, 14, y);
+            y += 5;
+        }
+        
+        // Pequena linha separadora discreta entre um funcionário e outro
+        y += 2;
+        pdf.setDrawColor(240, 240, 240);
+        pdf.line(14, y, 196, y);
+        y += 7; // Espaçamento para o próximo bloco
     });
-    pdf.save(`uniformes_${statusFiltro}.pdf`);
+    
+    // Salva o PDF gerado
+    pdf.save(`relatorio_${tipoAtual}_${statusFiltro}.pdf`);
 }
 
 carregar();
