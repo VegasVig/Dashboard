@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNIFORMES_Vegas</title>
+    <title>UNIFORMESVegas</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -401,32 +401,29 @@ function atualizarRanking() {
         || "<p style='color:#888'>Nenhum dado.</p>";
 }
 
-/* ── PDF Otimizado (Sem assinaturas/fotos, apenas os dados solicitados) ── */
+/* ── PDF Definitivo — Sem Cidade / Sem Fotos / Com Data, Nome, Posto e Itens ── */
 async function exportarPDF(statusFiltro) {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
     
-    // Configurações iniciais do PDF
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(16);
     
     const tituloTipo = tipoAtual === "uniformes" ? "UNIFORMES" : "MATERIAIS";
     pdf.text(`RELATÓRIO DE ${tituloTipo} - STATUS: ${statusFiltro}`, 14, 20);
     
-    // Data de emissão do relatório
+    // Data atual automatizada
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(10);
     const dataAtual = new Date().toLocaleDateString('pt-BR');
     pdf.text(`Emitido em: ${dataAtual}`, 14, 27);
     
-    // Linha divisória do cabeçalho
     pdf.setDrawColor(200, 200, 200);
     pdf.line(14, 30, 196, 30);
     
-    let y = 38; // Posição vertical inicial para os dados
-    const limitePagina = 275; // Margem de segurança inferior
+    let y = 38;
+    const limitePagina = 275;
     
-    // Filtra os dados atuais pelo status clicado
     const itensFiltrados = dadosGlobais.filter(i => i.status === statusFiltro);
     
     if (itensFiltrados.length === 0) {
@@ -437,37 +434,32 @@ async function exportarPDF(statusFiltro) {
     }
 
     itensFiltrados.forEach((item, index) => {
-        // Verifica se o bloco de dados atual vai estourar o limite da página
-        // Estimando ~35mm de altura para cada bloco de funcionário com os textos quebrados
-        if (y + 35 > limitePagina) {
+        // Altura de segurança para cada bloco
+        if (y + 30 > limitePagina) {
             pdf.addPage();
-            y = 20; // Reinicia o topo na nova página
+            y = 20;
         }
         
-        // Estilo do Bloco/Nome do funcionário
+        // Nome do funcionário
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(12);
         pdf.text(`${index + 1}. ${item.nome || "Não informado"}`, 14, y);
         y += 6;
         
-        // Detalhes do item (Texto normal)
+        // Detalhes (Data e Posto)
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(10);
-        
-        // Cidade e Posto
-        const cidadeTxt = item.cidade || "Não informada";
         const postoTxt = item.posto || "Não informado";
-        pdf.text(`Cidade: ${cidadeTxt}   |   Posto: ${postoTxt}`, 14, y);
+        pdf.text(`Data: ${dataAtual}   |   Posto: ${postoTxt}`, 14, y);
         y += 6;
         
-        // Exibição dos itens solicitados dependendo da aba ativa
+        // Itens Solicitados
         if (tipoAtual === "uniformes") {
             pdf.setFont("helvetica", "bold");
             pdf.text("Uniformes Solicitados:", 14, y);
             pdf.setFont("helvetica", "normal");
             y += 5;
             
-            // Trata quebras de linha caso o texto de uniformes seja muito longo
             const textoUniformes = item.uniformes || "Nenhum uniforme listado";
             const linhasUniformes = pdf.splitTextToSize(textoUniformes, 180);
             
@@ -477,21 +469,19 @@ async function exportarPDF(statusFiltro) {
                 y += 5;
             });
         } else {
-            // Se for Materiais
             const materialTxt = item.material || "Não informado";
             const qtdTxt = item.quantidade || "0";
             pdf.text(`Material: ${materialTxt}  (Qtd: ${qtdTxt})`, 14, y);
             y += 5;
         }
         
-        // Pequena linha separadora discreta entre um funcionário e outro
+        // Linha separadora discreta
         y += 2;
         pdf.setDrawColor(240, 240, 240);
         pdf.line(14, y, 196, y);
-        y += 7; // Espaçamento para o próximo bloco
+        y += 7; 
     });
     
-    // Salva o PDF gerado
     pdf.save(`relatorio_${tipoAtual}_${statusFiltro}.pdf`);
 }
 
