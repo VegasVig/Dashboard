@@ -141,7 +141,7 @@ let grafico;
 let menuAberto   = null;
 let rankingAberto = false;
 
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyVp4BV2-P5P7cs0ShLTRI53xsPo3CxjA42Q5D9hwPZVXkwau7E9w0iAdYMJjOCsXc/exec";
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycby09bSqj7qAKG4bEOc996--c4UllFA-yoPKvCK7pg2kMWYRr5OLLPbu4O-u-7s4Q_6H6Q/exec";
 
 /* ── Fecha dropdown ao clicar fora ── */
 document.addEventListener("click", () => {
@@ -497,6 +497,33 @@ async function exportarPDF(statusFiltro) {
     });
     
     pdf.save(`relatorio_${tipoAtual}_${statusFiltro}.pdf`);
+
+    // Após exportar o PDF de ENTREGUES, oferece apagar esses registros da planilha
+    if (statusFiltro === "ENTREGUE") {
+        const qtd = itensFiltrados.length;
+        const confirmar = confirm(`PDF gerado com ${qtd} pedido(s) entregue(s).\n\nDeseja apagar esses ${qtd} registro(s) da planilha agora?\n\nEsta ação NÃO pode ser desfeita.`);
+        if (confirmar) {
+            await apagarEntreguesDaPlanilha();
+        }
+    }
+}
+
+/* ── Apagar entregues da planilha (após confirmação) ── */
+async function apagarEntreguesDaPlanilha() {
+    toast("Apagando entregues...", "#555");
+    try {
+        const url = `${URL_SCRIPT}?func=apagarEntregues&tipo=${tipoAtual}`;
+        const res  = await fetch(url);
+        const json = await res.json();
+        if (json.sucesso) {
+            toast(`✓ ${json.apagados} registro(s) apagado(s)`, "#22c55e");
+            await carregar();
+        } else {
+            throw new Error(json.erro || "Erro desconhecido");
+        }
+    } catch (err) {
+        toast("Erro ao apagar: " + err.message, "#ef4444");
+    }
 }
 
 carregar();
