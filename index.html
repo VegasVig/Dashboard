@@ -415,6 +415,30 @@ function atualizarRanking() {
         || "<p style='color:#888'>Nenhum dado.</p>";
 }
 
+/* ── Normaliza a assinatura (redesenha em canvas) para o jsPDF sempre conseguir ler,
+   independente do formato/variante do PNG original ── */
+function normalizarAssinatura(dataUrl) {
+    return new Promise((resolve) => {
+        try {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = img.naturalWidth || 300;
+                canvas.height = img.naturalHeight || 120;
+                const ctx = canvas.getContext("2d");
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+                resolve(canvas.toDataURL("image/jpeg", 0.92));
+            };
+            img.onerror = () => resolve(null);
+            img.src = dataUrl;
+        } catch (e) {
+            resolve(null);
+        }
+    });
+}
+
 /* ── PDF Definitivo — Sem Cidade / Sem Fotos / Com Data, Nome, Posto e Itens ── */
 async function exportarPDF(statusFiltro) {
     const { jsPDF } = window.jspdf;
@@ -447,7 +471,9 @@ async function exportarPDF(statusFiltro) {
         return;
     }
 
-    itensFiltrados.forEach((item, index) => {
+    for (let index = 0; index < itensFiltrados.length; index++) {
+        const item = itensFiltrados[index];
+
         // Altura de segurança para cada bloco
         if (y + 30 > limitePagina) {
             pdf.addPage();
@@ -496,12 +522,18 @@ async function exportarPDF(statusFiltro) {
             pdf.setFontSize(10);
             pdf.text("Assinatura:", 14, y);
             y += 4;
-            try {
-                const formato = item.assinatura.includes("image/jpeg") || item.assinatura.includes("image/jpg")
-                    ? "JPEG" : "PNG";
-                pdf.addImage(item.assinatura, formato, 14, y, 55, 22);
-                y += 26;
-            } catch (e) {
+
+            const assinaturaNormalizada = await normalizarAssinatura(item.assinatura);
+            if (assinaturaNormalizada) {
+                try {
+                    pdf.addImage(assinaturaNormalizada, "JPEG", 14, y, 55, 22);
+                    y += 26;
+                } catch (e) {
+                    pdf.setFont("helvetica", "normal");
+                    pdf.text("(assinatura não pôde ser carregada)", 14, y);
+                    y += 6;
+                }
+            } else {
                 pdf.setFont("helvetica", "normal");
                 pdf.text("(assinatura não pôde ser carregada)", 14, y);
                 y += 6;
@@ -513,7 +545,7 @@ async function exportarPDF(statusFiltro) {
         pdf.setDrawColor(240, 240, 240);
         pdf.line(14, y, 196, y);
         y += 7; 
-    });
+    }
     
     pdf.save(`relatorio_${tipoAtual}_${statusFiltro}.pdf`);
 
