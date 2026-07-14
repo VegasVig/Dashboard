@@ -489,6 +489,25 @@ async function exportarPDF(statusFiltro) {
             y += 5;
         }
         
+        // Assinatura (prova de solicitação)
+        if (item.assinatura && item.assinatura.length > 10) {
+            if (y + 34 > limitePagina) { pdf.addPage(); y = 20; }
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(10);
+            pdf.text("Assinatura:", 14, y);
+            y += 4;
+            try {
+                const formato = item.assinatura.includes("image/jpeg") || item.assinatura.includes("image/jpg")
+                    ? "JPEG" : "PNG";
+                pdf.addImage(item.assinatura, formato, 14, y, 55, 22);
+                y += 26;
+            } catch (e) {
+                pdf.setFont("helvetica", "normal");
+                pdf.text("(assinatura não pôde ser carregada)", 14, y);
+                y += 6;
+            }
+        }
+
         // Linha separadora discreta
         y += 2;
         pdf.setDrawColor(240, 240, 240);
