@@ -21,6 +21,8 @@
         .container { max-width: 1100px; margin: auto; padding: 15px; }
         .card { background: #121212; border: 1px solid #2a2a2a; border-radius: 14px; padding: 15px; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,.6); }
         .nome { font-size: 18px; font-weight: bold; margin-bottom: 10px; color: #fff; }
+        .timeline { font-size: 12px; color: #9ca3af; margin: -6px 0 12px; line-height: 1.6; }
+        .timeline .marco-entregue { color: #22c55e; font-weight: bold; }
 
         /* Badge status */
         .badge { display: inline-block; padding: 5px 13px; border-radius: 8px; font-weight: bold; font-size: 13px; }
@@ -139,7 +141,7 @@ let grafico;
 let menuAberto   = null;
 let rankingAberto = false;
 
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycby09bSqj7qAKG4bEOc996--c4UllFA-yoPKvCK7pg2kMWYRr5OLLPbu4O-u-7s4Q_6H6Q/exec";
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyVp4BV2-P5P7cs0ShLTRI53xsPo3CxjA42Q5D9hwPZVXkwau7E9w0iAdYMJjOCsXc/exec";
 
 /* ── Fecha dropdown ao clicar fora ── */
 document.addEventListener("click", () => {
@@ -243,6 +245,16 @@ function renderizar() {
 }
 
 /* ── Montar card ── */
+function montarTimeline(item) {
+    const partes = [];
+    if (item.data)         partes.push(`Pedido: ${item.data}`);
+    if (item.dataPendente) partes.push(`Pendente desde: ${item.dataPendente}`);
+    if (item.dataSeparado) partes.push(`Separado em: ${item.dataSeparado}`);
+    if (item.dataEntrega)  partes.push(`<span class="marco-entregue">Entregue em: ${item.dataEntrega}</span>`);
+    if (partes.length === 0) return "";
+    return `<p class="timeline">${partes.join(" &nbsp;·&nbsp; ")}</p>`;
+}
+
 function montarCard(item) {
     const badgeClass = {
         "EM ANÁLISE": "badge-em-analise",
@@ -285,6 +297,7 @@ function montarCard(item) {
 
     if (tipoAtual === "materiais") return `
         <div class="nome">${item.nome||""}</div>
+        ${montarTimeline(item)}
         <p><b>Protocolo:</b>  ${item.protocolo ||""}</p>
         <p><b>Cidade:</b>     ${item.cidade    ||""}</p>
         <p><b>Posto:</b>      ${item.posto     ||""}</p>
@@ -296,6 +309,7 @@ function montarCard(item) {
 
     return `
         <div class="nome">${item.nome||""}</div>
+        ${montarTimeline(item)}
         <p><b>Protocolo:</b> ${item.protocolo ||""}</p>
         <p><b>CPF:</b>       ${item.cpf       ||""}</p>
         <p><b>Telefone:</b>  ${item.telefone  ||""}</p>
