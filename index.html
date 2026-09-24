@@ -98,6 +98,7 @@
     <input type="text" id="buscaNome"      placeholder="Buscar Nome"      oninput="renderizar()">
     <input type="text" id="buscaCPF"       placeholder="Buscar CPF"       oninput="renderizar()">
     <input type="text" id="buscaProtocolo" placeholder="Buscar Protocolo" oninput="renderizar()">
+    <input type="text" id="buscaPosto"     placeholder="Buscar Posto de Serviço" oninput="renderizar()">
     <select id="filtroStatus" onchange="renderizar()">
         <option value="">Todos Status</option>
         <option value="EM ANÁLISE">EM ANÁLISE</option>
@@ -209,6 +210,7 @@ function renderizar() {
     const busca     = document.getElementById("buscaNome").value.toLowerCase();
     const buscaCPF  = document.getElementById("buscaCPF").value.toLowerCase();
     const buscaProt = document.getElementById("buscaProtocolo").value.toLowerCase();
+    const buscaPosto = document.getElementById("buscaPosto").value.toLowerCase();
     const filtroSts = document.getElementById("filtroStatus").value;
     const lista     = document.getElementById("lista");
     lista.innerHTML = "";
@@ -219,6 +221,7 @@ function renderizar() {
         if (busca     && !(item.nome      ||"").toLowerCase().includes(busca))     return;
         if (buscaCPF  && !(item.cpf       ||"").toLowerCase().includes(buscaCPF))  return;
         if (buscaProt && !(item.protocolo ||"").toLowerCase().includes(buscaProt)) return;
+        if (buscaPosto && !(item.posto    ||"").toLowerCase().includes(buscaPosto)) return;
         if (filtroSts && item.status !== filtroSts) return;
 
         total++;
