@@ -1,587 +1,966 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNIFORMESVegas</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: 'Segoe UI', Arial; background: radial-gradient(circle at top, #1c1c1c, #000); color: #e5e5e5; }
-        header { text-align: center; padding: 20px; background: #111; box-shadow: 0 4px 15px black; }
-        .logo { width: 180px; margin-bottom: 10px; }
-        .filtros { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 15px; }
-        input, select, button { padding: 10px; border-radius: 8px; border: 1px solid #444; background: #000; color: white; min-width: 180px; }
-        button { cursor: pointer; transition: .2s; }
-        button:hover { background: #1a1a1a; }
-        .stats { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 10px; }
-        .stat { background: #121212; border: 1px solid #2a2a2a; padding: 10px 20px; border-radius: 10px; font-weight: bold; }
-        .graficoBox { max-width: 500px; margin: 20px auto; background: #121212; padding: 15px; border-radius: 12px; border: 1px solid #2a2a2a; }
-        .container { max-width: 1100px; margin: auto; padding: 15px; }
-        .card { background: #121212; border: 1px solid #2a2a2a; border-radius: 14px; padding: 15px; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,.6); }
-        .nome { font-size: 18px; font-weight: bold; margin-bottom: 10px; color: #fff; }
-        .timeline { font-size: 12px; color: #9ca3af; margin: -6px 0 12px; line-height: 1.6; }
-        .timeline .marco-entregue { color: #22c55e; font-weight: bold; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="robots" content="noindex">
+<title>Estoque de Uniformes · Vegas Vigilância</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.31/dist/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{
+  --preto:#000;--grafite:#121417;--grafite2:#1b1e22;--grafite3:#262a2f;
+  --linha:rgba(214,218,224,.12);--linha2:rgba(214,218,224,.25);
+  --prata:#cdd1d6;--prata2:#9aa0a7;--texto:#eceef0;--suave:#a3a9b0;--fraco:#6f757c;
+  --cromo:linear-gradient(180deg,#fbfcfc 0%,#d3d7db 38%,#7c8289 52%,#c3c7cc 70%,#eef0f2 100%);
+  --cromo-btn:linear-gradient(180deg,#f2f3f4 0%,#c9cdd2 48%,#9ea4ab 52%,#d7dadd 100%);
+  --ok:#86c29b;--aviso:#d8a94a;--erro:#e46d72;
+  --r1:6px;--r2:12px;--r3:18px;
+  --display:'Saira Condensed','Arial Narrow',sans-serif;--corpo:'Barlow','Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--preto);color:var(--texto);font-family:var(--corpo);font-size:14.5px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;background:radial-gradient(1100px 500px at 80% -10%,rgba(205,209,214,.09),transparent 60%),linear-gradient(180deg,#0a0b0d,#000 70%)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--prata);outline-offset:2px}
+[hidden]{display:none!important}
 
-        /* Badge status */
-        .badge { display: inline-block; padding: 5px 13px; border-radius: 8px; font-weight: bold; font-size: 13px; }
-        .badge-em-analise { background: #f97316; color: #fff; }
-        .badge-pendente   { background: #facc15; color: #000; }
-        .badge-separado   { background: #3b82f6; color: #fff; }
-        .badge-entregue   { background: #22c55e; color: #000; }
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.login form{width:100%;max-width:380px;padding:30px 26px;border-radius:var(--r3);background:linear-gradient(180deg,rgba(30,33,37,.95),rgba(10,11,13,.98));border:1px solid var(--linha2);box-shadow:0 30px 80px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.08);text-align:center}
+.login img{width:96px;height:96px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--linha2),0 0 40px rgba(205,209,214,.12)}
+.login h1{margin:10px 0 0;font-family:var(--display);font-size:46px;font-weight:800;line-height:1;background:var(--cromo);-webkit-background-clip:text;background-clip:text;color:transparent}
+.login p{margin:4px 0 22px;color:var(--suave)}
+.login label{text-align:left}
 
-        /* Dropdown status */
-        .statusWrap { position: relative; display: inline-block; margin-top: 12px; }
-        .statusWrap .badge { cursor: pointer; user-select: none; padding-right: 26px; }
-        .statusWrap .badge::after { content: " ▾"; font-size: 11px; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); }
-        .statusMenu { display: none; position: absolute; top: calc(100% + 6px); left: 0; background: #1e1e1e; border: 1px solid #444; border-radius: 10px; overflow: hidden; z-index: 100; min-width: 160px; box-shadow: 0 8px 24px rgba(0,0,0,.7); }
-        .statusMenu.aberto { display: block; }
-        .statusMenu button { display: block; width: 100%; text-align: left; padding: 10px 16px; border: none; background: transparent; color: #e5e5e5; font-size: 13px; font-weight: bold; min-width: unset; border-radius: 0; cursor: pointer; transition: background .15s; }
-        .statusMenu button:hover { background: #2a2a2a; }
-        .statusMenu button.opt-em-analise { color: #f97316; }
-        .statusMenu button.opt-pendente   { color: #facc15; }
-        .statusMenu button.opt-separado   { color: #3b82f6; }
-        .statusMenu button.opt-entregue   { color: #22c55e; }
-        .statusMenu button.atual { background: #2a2a2a; opacity: .5; pointer-events: none; }
+/* moldura */
+.topo{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:10px 18px;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--linha)}
+.topo img{width:40px;height:40px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--linha2)}
+.topo .t{display:flex;flex-direction:column;line-height:1}
+.topo .t b{font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:.03em;background:var(--cromo);-webkit-background-clip:text;background-clip:text;color:transparent}
+.topo .t span{font-size:12px;color:var(--suave);letter-spacing:.04em}
+.topo .u{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--suave);font-size:13px}
+.app{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:calc(100vh - 61px)}
+nav.menu{border-right:1px solid var(--linha);padding:16px 10px;display:flex;flex-direction:column;gap:2px;position:sticky;top:61px;height:calc(100vh - 61px);overflow:auto}
+nav.menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:none;padding:10px 12px;border-radius:var(--r1);color:var(--suave);cursor:pointer;font-weight:500}
+nav.menu button:hover{background:var(--grafite2);color:var(--texto)}
+nav.menu button[aria-current=page]{background:var(--grafite2);color:var(--texto);box-shadow:inset 3px 0 0 var(--prata)}
+nav.menu .cont{margin-left:auto;font-size:12px;min-width:22px;text-align:center;padding:1px 6px;border-radius:999px;background:var(--grafite3);color:var(--prata)}
+nav.menu .cont.alerta{background:rgba(228,109,114,.18);color:var(--erro)}
+main{padding:22px 26px 60px;min-width:0}
+h2.tit{margin:0 0 4px;font-family:var(--display);font-size:30px;font-weight:700;letter-spacing:.02em}
+p.sub{margin:0 0 18px;color:var(--suave)}
+h3.sec{margin:28px 0 10px;font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:10px}
 
-        /* Fotos */
-        .fotosBox { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-        .fotoAvaria { width: 120px; height: 120px; object-fit: cover; border-radius: 10px; border: 1px solid #333; cursor: pointer; transition: transform .2s; }
-        .fotoAvaria:hover { transform: scale(1.06); }
-        .assinatura { display: block; margin-top: 10px; background: white; border-radius: 10px; max-width: 240px; }
+/* componentes */
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.kpi{padding:14px 16px;border-radius:var(--r2);background:linear-gradient(180deg,rgba(255,255,255,.04),transparent 70%),var(--grafite);border:1px solid var(--linha);position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)}
+.kpi span{display:block;color:var(--suave);font-size:13px}
+.kpi b{display:block;font-family:var(--display);font-size:32px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
+.kpi small{color:var(--fraco);font-size:12.5px}
+.kpi.destaque b{background:linear-gradient(180deg,#fff 0%,#e3e6e9 55%,#a2a8ae 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kpi b.longo{font-size:clamp(19px,2.2vw,26px)}
+.kpi.alerta{border-color:rgba(228,109,114,.4)} .kpi.alerta b{color:var(--erro)}
+.barra{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:14px}
+.barra label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--suave);min-width:130px;flex:1}
+.barra .acoes{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+input,select,textarea{width:100%;background:#050607;border:1px solid var(--linha2);border-radius:var(--r1);padding:8px 10px;min-height:38px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--prata);box-shadow:0 0 0 3px rgba(205,209,214,.12)}
+input[type=number]{font-variant-numeric:tabular-nums}
+input[type=checkbox]{width:18px;height:18px;min-height:0;accent-color:#c9cdd2}
+textarea{min-height:70px;resize:vertical}
+label.c{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--suave)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 14px;border-radius:var(--r1);border:1px solid var(--linha2);background:var(--grafite2);cursor:pointer;font-weight:600;font-size:13.5px;white-space:nowrap}
+.btn:hover{border-color:var(--prata2)}
+.btn.p{border:0;color:#0b0c0d;background:var(--cromo-btn);box-shadow:inset 0 1px 0 #fff}
+.btn.p:hover{filter:brightness(1.06)}
+.btn.perigo{border-color:rgba(228,109,114,.45);color:#f0a8ab}
+.btn.peq{min-height:30px;padding:4px 10px;font-size:12.5px}
+.btn:disabled{opacity:.5;cursor:wait}
+.tabela{overflow-x:auto;border:1px solid var(--linha);border-radius:var(--r2);background:var(--grafite)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--linha);vertical-align:middle}
+th{color:var(--suave);font-weight:500;font-size:12px;background:rgba(0,0,0,.35);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.baixo td{background:rgba(216,169,74,.05)} tr.zero td{background:rgba(228,109,114,.06)}
+.selo{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--linha2);color:var(--prata);white-space:nowrap}
+.selo.ok{color:var(--ok);border-color:rgba(134,194,155,.45)} .selo.aviso{color:var(--aviso);border-color:rgba(216,169,74,.45)} .selo.erro{color:var(--erro);border-color:rgba(228,109,114,.45)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px}
+.card{border:1px solid var(--linha);border-radius:var(--r2);background:var(--grafite);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.card header b{font-family:var(--display);font-size:19px;letter-spacing:.04em}
+.card .meta{color:var(--suave);font-size:13px}
+.card .acoes{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:8px;border-top:1px solid var(--linha)}
+.card table{font-size:13px} .card th,.card td{padding:5px 6px}
+.alertas{display:grid;gap:8px}
+.alerta-l{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 14px;border-radius:var(--r1);border:1px solid rgba(216,169,74,.35);background:rgba(216,169,74,.05)}
+.alerta-l.zero{border-color:rgba(228,109,114,.45);background:rgba(228,109,114,.06)}
+.alerta-l b{font-weight:600}
+.alerta-l .q{font-family:var(--display);font-size:22px;font-weight:700}
+.vazio{padding:22px;text-align:center;color:var(--suave);border:1px dashed var(--linha2);border-radius:var(--r2)}
+details.hist summary{cursor:pointer;color:var(--suave);font-size:12.5px}
+details.hist ol{margin:6px 0 0;padding-left:18px;color:var(--suave);font-size:12.5px}
+.grade2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grade3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.mais{display:block;margin:14px auto 0}
+.tot{font-family:var(--display);font-size:22px;font-weight:700}
 
-        /* Tipo toggle */
-        .tipoToggle { display: flex; justify-content: center; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        .tipoToggle .ativo { background: #c0c0c0; color: black; font-weight: bold; }
+/* modal */
+.fundo{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.75);display:flex;align-items:flex-start;justify-content:center;padding:4vh 14px;overflow:auto}
+.modal{width:100%;max-width:640px;background:linear-gradient(180deg,#1d2024,#0f1113);border:1px solid var(--linha2);border-radius:var(--r3);box-shadow:0 40px 100px rgba(0,0,0,.9);padding:22px}
+.modal.largo{max-width:1040px}
+.modal h3{margin:0 0 4px;font-family:var(--display);font-size:24px;font-weight:700}
+.modal .sub{color:var(--suave);margin:0 0 16px}
+.modal .rodape{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;flex-wrap:wrap}
+.erro-m{color:#f2b8bb;background:rgba(228,109,114,.08);border:1px solid rgba(228,109,114,.4);border-radius:var(--r1);padding:9px 12px;margin-top:12px}
+.aviso-m{color:#ecd5a4;background:rgba(216,169,74,.07);border:1px solid rgba(216,169,74,.35);border-radius:var(--r1);padding:9px 12px;margin-top:12px;font-size:13px}
+.chk input[type=number]{width:72px}
+.chk td{padding:6px}
+.chk tr.err td{background:rgba(228,109,114,.08)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;transition:.2s;z-index:80;padding:11px 18px;border-radius:var(--r1);background:#1d2024;border:1px solid var(--linha2);box-shadow:0 10px 40px rgba(0,0,0,.7);max-width:90vw}
+#toast.on{opacity:1;transform:translateX(-50%)}
+#toast.erro{border-color:rgba(228,109,114,.6);color:#f2b8bb}
+.carregando{position:fixed;top:61px;left:0;right:0;height:2px;z-index:30;background:linear-gradient(90deg,transparent,var(--prata),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:corre 1s linear infinite}
+@keyframes corre{from{background-position:-40% 0}to{background-position:140% 0}}
+.fichares{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
+.thumb{width:110px;height:110px;object-fit:cover;border-radius:var(--r1);border:1px solid var(--linha2);cursor:zoom-in;background:#fff}
 
-        #loadingMsg { text-align: center; padding: 20px; }
-
-        /* Ranking */
-        .rankingBox { max-width: 500px; margin: 0 auto 10px; text-align: center; }
-        .rankingToggleBtn { background: #1e1e1e; border: 1px solid #3a3a3a; color: #e5e5e5; padding: 10px 24px; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; min-width: unset; transition: background .2s; }
-        .rankingToggleBtn:hover { background: #2a2a2a; }
-        .rankingLista { display: none; margin-top: 10px; background: #121212; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; text-align: left; }
-        .rankingLista.aberta { display: block; }
-        .rankingItem { background: #1b1b1b; padding: 10px; border-radius: 10px; margin-top: 8px; border: 1px solid #2a2a2a; }
-
-        /* Modal */
-        #modalFoto { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 9999; justify-content: center; align-items: center; }
-        #modalFoto.aberto { display: flex; }
-        #modalFoto img { max-width: 92vw; max-height: 92vh; border-radius: 12px; }
-        #modalFoto .fechar { position: fixed; top: 16px; right: 24px; font-size: 40px; cursor: pointer; color: #fff; user-select: none; }
-
-        /* Toast */
-        #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 11px 24px; border-radius: 10px; font-weight: bold; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 9999; white-space: nowrap; }
-        #toast.visivel { opacity: 1; }
-    </style>
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  nav.menu{position:sticky;top:61px;z-index:15;height:auto;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--linha);padding:8px;background:rgba(0,0,0,.92)}
+  nav.menu button{width:auto;white-space:nowrap;padding:8px 12px}
+  nav.menu button[aria-current=page]{box-shadow:inset 0 -2px 0 var(--prata)}
+  main{padding:16px 12px 60px}
+  .cards{grid-template-columns:1fr}
+  .grade2,.grade3,.fichares{grid-template-columns:1fr}
+  .topo .t span,.topo .u .nm,.topo .u .selo{display:none}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .kpi{padding:12px}.kpi b{font-size:26px}
+  .alerta-l{grid-template-columns:minmax(0,1fr) auto}.alerta-l>div:last-child{grid-column:1/-1}
+  .barra label{min-width:calc(50% - 6px)}
+}
+@media (prefers-reduced-motion:reduce){.carregando{animation:none}}
+</style>
 </head>
 <body>
 
-<div id="modalFoto" onclick="fecharModal()">
-    <span class="fechar">&#x2715;</span>
-    <img id="modalImg" src="" onclick="event.stopPropagation()">
-</div>
-<div id="toast"></div>
+<section class="login" id="telaLogin">
+  <form onsubmit="entrar(event)">
+    <img src="assets/vegaslogo.jpg" alt="Escudo Vegas">
+    <h1>VEGAS</h1>
+    <p>Estoque e controle de uniformes</p>
+    <label class="c">Usuário<input id="lUsuario" autocomplete="username" required></label>
+    <label class="c" style="margin-top:12px">Senha<input id="lSenha" type="password" autocomplete="current-password" required></label>
+    <div class="erro-m" id="lErro" hidden></div>
+    <button class="btn p" style="width:100%;margin-top:18px;min-height:46px" id="lBtn">Entrar</button>
+  </form>
+</section>
 
-<header>
-    <img src="assets/vegaslogo.jpg" class="logo">
-    <h2>UNIFORMES E MATERIAIS VEGAS VIGILÂNCIA</h2>
-</header>
-
-<div class="tipoToggle">
-    <button id="btnUniformes" class="ativo" onclick="trocarTipo('uniformes')">Uniformes</button>
-    <button id="btnMateriais" onclick="trocarTipo('materiais')">Materiais</button>
-</div>
-
-<div class="filtros">
-    <input type="text" id="buscaNome"      placeholder="Buscar Nome"      oninput="renderizar()">
-    <input type="text" id="buscaCPF"       placeholder="Buscar CPF"       oninput="renderizar()">
-    <input type="text" id="buscaProtocolo" placeholder="Buscar Protocolo" oninput="renderizar()">
-    <input type="text" id="buscaCidade"    placeholder="Buscar Cidade" oninput="renderizar()">
-    <select id="filtroStatus" onchange="renderizar()">
-        <option value="">Todos Status</option>
-        <option value="EM ANÁLISE">EM ANÁLISE</option>
-        <option value="PENDENTE">PENDENTE</option>
-        <option value="SEPARADO">SEPARADO</option>
-        <option value="ENTREGUE">ENTREGUE</option>
-    </select>
+<div id="telaApp" hidden>
+  <header class="topo">
+    <img src="assets/vegaslogo.jpg" alt="">
+    <div class="t"><b>VEGAS</b><span>Estoque de uniformes</span></div>
+    <div class="u"><span class="nm" id="uNome"></span><span class="selo" id="uPerfil"></span>
+      <button class="btn peq" onclick="carregar()">Atualizar</button><button class="btn peq" onclick="sair()">Sair</button></div>
+  </header>
+  <div class="carregando" id="barraCarga" hidden></div>
+  <div class="app">
+    <nav class="menu" id="menu"></nav>
+    <main id="conteudo"></main>
+  </div>
 </div>
 
-<div class="stats">
-    <div class="stat" id="total">Total: 0</div>
-    <div class="stat" id="stAnalise"   style="color:#f97316">Em análise: 0</div>
-    <div class="stat" id="stPendentes" style="color:#facc15">Pendentes: 0</div>
-    <div class="stat" id="stSeparados" style="color:#3b82f6">Separados: 0</div>
-    <div class="stat" id="stEntregues" style="color:#22c55e">Entregues: 0</div>
-</div>
-
-<div class="tipoToggle">
-    <button onclick="exportarPDF('EM ANÁLISE')">PDF EM ANÁLISE</button>
-    <button onclick="exportarPDF('PENDENTE')">PDF PENDENTES</button>
-    <button onclick="exportarPDF('SEPARADO')">PDF SEPARADOS</button>
-    <button onclick="exportarPDF('ENTREGUE')">PDF ENTREGUES</button>
-</div>
-
-<div class="graficoBox">
-    <canvas id="graficoStatus"></canvas>
-</div>
-
-<div class="rankingBox">
-    <button class="rankingToggleBtn" id="btnRanking" onclick="toggleRanking()">&#x1F3C6; Ver Ranking de Solicitações</button>
-    <div class="rankingLista" id="rankingLista"></div>
-</div>
-
-<div id="loadingMsg">Carregando dados...</div>
-<div class="container" id="lista"></div>
+<div id="toast" role="status"></div>
 
 <script>
-let dadosGlobais = [];
-let tipoAtual    = "uniformes";
-let grafico;
-let menuAberto   = null;
-let rankingAberto = false;
+const API = "https://script.google.com/macros/s/AKfycbwexMtw2Ttr_OoIc24r7g7qyVeoJu-RTFhRopbou6sO_MwfXSGpwxFkE6mH6eB09AVbkA/exec";
 
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwexMtw2Ttr_OoIc24r7g7qyVeoJu-RTFhRopbou6sO_MwfXSGpwxFkE6mH6eB09AVbkA/exec";
+/* nomes usados no formulário do funcionário: cadastrar com o mesmo nome faz a peça aparecer no kit do posto */
+const NOMES_KIT = ["Apito","Baleiro","Blazer","Blusa cinza","Blusa de Frio","Blusa Preta","Blusa preta serviços","Blusa preta vigilância","Boné","Botina","Botom preto vigilante","Calça elástico cinza","Calça jeans","Calça social","Calça Tática","Calça vigilante tática","Camisa ASG","Camisa porteiro","Camisa Preta","Camisa social branca","Camisa social preta","Camisa vigilante bege curta","Camisa vigilante bege longa","Capa para placa balística","Casaco Preto","Casaco preto serviços","Casaco preto vigilância","Casaco vigilância","Cinto","Cinto tático","Cobertura/Boné","Coldre","Coturno","Fiel","Galocha","Gandola","Gandola Cinza","Gandola Preta","Gravata","Sapato social","Touca","Touca vegas vigilância"];
+const CATEGORIAS = ["Camisa","Calça","Agasalho","Calçado","Acessório","Equipamento","Outros"];
 
-/* ── Fecha dropdown ao clicar fora ── */
-document.addEventListener("click", () => {
-    if (menuAberto) { menuAberto.classList.remove("aberto"); menuAberto = null; }
-});
+const ST = { AGUARD:"Aguardando aprovação", APROV:"Aprovado", SEPAR:"Separando peças", DISP:"Disponível para retirada", ENTPARC:"Entregue parcialmente",
+  ENTREG:"Entregue ao funcionário", DEVPEND:"Devolução pendente", DEVPARC:"Parcialmente devolvido", DEVOK:"Devolução concluída", CANC:"Cancelado" };
+const LEGADO = { "EM ANÁLISE":ST.AGUARD, "PENDENTE":ST.APROV, "SEPARADO":ST.DISP, "ENTREGUE":ST.ENTREG };
+const FIN = ["Em análise","Aguardando aprovação","Aprovado administrativamente","Contestação registrada","Resolvido","Cancelado após revisão"];
+const TIPOS_MOV = { ENTRADA_INICIAL:"Entrada inicial", ENTRADA_COMPRA:"Entrada por compra", ENTRADA_DEVOLUCAO:"Entrada por devolução", SAIDA_ENTREGA:"Saída por entrega",
+  RESERVA:"Reserva", RESERVA_LIBERADA:"Reserva liberada", AJUSTE_MANUAL:"Ajuste manual", BAIXA_DANO:"Baixa por dano", BAIXA_EXTRAVIO:"Baixa por extravio",
+  QUARENTENA_DEVOLUCAO:"Quarentena (devolução danificada)", QUARENTENA_LIBERADA:"Quarentena liberada", BAIXA_INUTILIZADA:"Baixa (inutilizada)", NAO_DEVOLVIDA:"Não devolvida",
+  ALERTA_ESTOQUE_BAIXO:"Alerta: estoque baixo", ALERTA_SEM_ESTOQUE:"Alerta: sem estoque", ALERTA_NORMALIZADO:"Alerta normalizado" };
 
-/* ── Modal ── */
-function abrirModal(src) {
-    document.getElementById("modalImg").src = src;
-    document.getElementById("modalFoto").classList.add("aberto");
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+const dig = s => String(s || "").replace(/\D/g, "");
+const brl = v => Number(v || 0).toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+const int = v => Math.floor(Number(v) || 0);
+const fData = iso => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? String(iso) : d.toLocaleString("pt-BR", { dateStyle:"short", timeStyle:"short" }); };
+const fDia = iso => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? String(iso) : d.toLocaleDateString("pt-BR"); };
+const diaISO = iso => { const d = new Date(iso); return isNaN(d) ? "" : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+const stOf = p => LEGADO[p.status] || p.status;
+
+let TOKEN = sessionStorage.getItem("vegasUnifToken") || "", EU = JSON.parse(sessionStorage.getItem("vegasUnifUser") || "null");
+let D = null, VIEW = "painel", filtros = {}, limite = 60;
+
+/* ───────── rede ───────── */
+async function api(acao, dados = {}, opt = {}) {
+  $("barraCarga").hidden = false;
+  try {
+    const r = await fetch(API, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body: JSON.stringify({ acao, token: TOKEN, ...dados }) });
+    const j = await r.json();
+    if (j.auth) { sair(true); throw new Error(j.erro); }
+    if (j.dados) { D = j.dados; if (!opt.semRender) render(); }
+    return j;
+  } catch (e) {
+    if (e instanceof TypeError) throw new Error("Sem conexão com o servidor. Tente de novo.");
+    throw e;
+  } finally { $("barraCarga").hidden = true; }
 }
-function fecharModal() {
-    document.getElementById("modalFoto").classList.remove("aberto");
-}
-
-/* ── Toast ── */
 let _tt;
-function toast(msg, cor="#333") {
-    clearTimeout(_tt);
-    const t = document.getElementById("toast");
-    t.textContent = msg; t.style.background = cor; t.classList.add("visivel");
-    _tt = setTimeout(() => t.classList.remove("visivel"), 3000);
-}
+function toast(msg, erro) { const t = $("toast"); t.textContent = msg; t.className = "on" + (erro ? " erro" : ""); clearTimeout(_tt); _tt = setTimeout(() => t.className = "", 3800); }
 
-/* ── Tipo ── */
-function trocarTipo(tipo) {
-    tipoAtual = tipo;
-    document.getElementById("btnUniformes").classList.toggle("ativo", tipo === "uniformes");
-    document.getElementById("btnMateriais").classList.toggle("ativo", tipo === "materiais");
-    carregar();
+/* ───────── sessão ───────── */
+async function entrar(ev) {
+  ev.preventDefault(); $("lErro").hidden = true; $("lBtn").disabled = true;
+  try {
+    const r = await api("login", { usuario: $("lUsuario").value, senha: $("lSenha").value });
+    if (!r.sucesso) throw new Error(r.erro);
+    TOKEN = r.token; EU = r.usuario;
+    sessionStorage.setItem("vegasUnifToken", TOKEN); sessionStorage.setItem("vegasUnifUser", JSON.stringify(EU));
+    $("lSenha").value = ""; iniciar();
+  } catch (e) { $("lErro").textContent = e.message; $("lErro").hidden = false; }
+  finally { $("lBtn").disabled = false; }
 }
-
-/* ── Carregar ── */
+function sair(expirou) {
+  if (!expirou && TOKEN) api("logout").catch(() => {});
+  TOKEN = ""; EU = null; D = null; sessionStorage.removeItem("vegasUnifToken"); sessionStorage.removeItem("vegasUnifUser");
+  $("telaApp").hidden = true; $("telaLogin").hidden = false; fecharModal();
+  if (expirou === true) { $("lErro").textContent = "Sua sessão expirou. Entre novamente."; $("lErro").hidden = false; }
+}
+async function iniciar() {
+  $("telaLogin").hidden = true; $("telaApp").hidden = false;
+  $("uNome").textContent = EU.nome; $("uPerfil").textContent = EU.perfil === "admin" ? "Administrador" : "Estoque";
+  await carregar();
+}
 async function carregar() {
-    document.getElementById("loadingMsg").style.display = "block";
-    document.getElementById("lista").innerHTML = "";
-    try {
-        const res  = await fetch(`${URL_SCRIPT}?tipo=${tipoAtual}`);
-        const json = await res.json();
-        dadosGlobais = json.map(item => {
-            // Normaliza fotos: pode vir como array ou string direta base64
-            if (typeof item.fotos === "string") {
-                if (item.fotos.startsWith("[")) {
-                    try { item.fotos = JSON.parse(item.fotos); } catch { item.fotos = []; }
-                } else if (item.fotos.startsWith("data:") || item.fotos.startsWith("http")) {
-                    item.fotos = [item.fotos];
-                } else {
-                    item.fotos = [];
-                }
-            }
-            if (!Array.isArray(item.fotos)) item.fotos = [];
-            item.fotos = item.fotos.filter(f => typeof f === "string" && f.length > 10);
-            return item;
-        });
-    } catch(err) {
-        toast("Erro ao carregar!", "#ef4444");
-        console.error(err);
-    }
-    document.getElementById("loadingMsg").style.display = "none";
-    renderizar();
+  try { const r = await api("painel", {}, { semRender: true }); if (!r.sucesso) throw new Error(r.erro); D = r.dados; render(); }
+  catch (e) { toast(e.message, true); }
 }
 
-/* ── Renderizar ── */
-function renderizar() {
-    const busca     = document.getElementById("buscaNome").value.toLowerCase();
-    const buscaCPF  = document.getElementById("buscaCPF").value.toLowerCase();
-    const buscaProt = document.getElementById("buscaProtocolo").value.toLowerCase();
-    const buscaCidade = document.getElementById("buscaCidade").value.toLowerCase();
-    const filtroSts = document.getElementById("filtroStatus").value;
-    const lista     = document.getElementById("lista");
-    lista.innerHTML = "";
-
-    let total=0, analise=0, pend=0, sep=0, ent=0;
-
-    dadosGlobais.slice().reverse().forEach(item => {
-        if (busca     && !(item.nome      ||"").toLowerCase().includes(busca))     return;
-        if (buscaCPF  && !(item.cpf       ||"").toLowerCase().includes(buscaCPF))  return;
-        if (buscaProt && !(item.protocolo ||"").toLowerCase().includes(buscaProt)) return;
-        if (buscaCidade && !(item.cidade  ||"").toLowerCase().includes(buscaCidade)) return;
-        if (filtroSts && item.status !== filtroSts) return;
-
-        total++;
-        if (item.status === "EM ANÁLISE") analise++;
-        if (item.status === "PENDENTE")   pend++;
-        if (item.status === "SEPARADO")   sep++;
-        if (item.status === "ENTREGUE")   ent++;
-
-        const div = document.createElement("div");
-        div.className = "card";
-        div.id = `card-${item.id}`;
-        div.innerHTML = montarCard(item);
-        lista.appendChild(div);
-    });
-
-    document.getElementById("total").innerText        = "Total: "      + total;
-    document.getElementById("stAnalise").innerText    = "Em análise: " + analise;
-    document.getElementById("stPendentes").innerText  = "Pendentes: "  + pend;
-    document.getElementById("stSeparados").innerText  = "Separados: "  + sep;
-    document.getElementById("stEntregues").innerText  = "Entregues: "  + ent;
-
-    atualizarGrafico(analise, pend, sep, ent);
-    atualizarRanking();
+/* ───────── cálculos ───────── */
+const disp = p => int(p.saldo) - int(p.reservado);
+const minimo = p => p.minimo === "" || p.minimo == null ? 5 : int(p.minimo);
+const pendEnt = e => int(e.qtdEntregue) - int(e.qtdDevolvida) - int(e.qtdDanificada) - int(e.qtdFaltante);
+function pedidoDe(prot) { return D.pedidos.find(p => p.protocolo === prot); }
+function indicadores() {
+  const at = D.pecas.filter(p => p.ativo === "SIM");
+  const emDev = new Set(D.pedidos.filter(p => [ST.DEVPEND, ST.DEVPARC].includes(p.status)).map(p => p.protocolo));
+  const k = { disp:0, vDisp:0, res:0, vEst:0, quar:0, com:0, vCom:0, dev:0, vDev:0, falt:0, vFalt:0, dan:0, alertas:0 };
+  at.forEach(p => { const d = Math.max(0, disp(p)); k.disp += d; k.vDisp += d * Number(p.valorUnit||0); k.res += int(p.reservado); k.vEst += int(p.saldo) * Number(p.valorUnit||0); k.quar += int(p.quarentena); if (p.alertaAtivo === "SIM") k.alertas++; });
+  D.entregas.forEach(e => { const pe = pendEnt(e), v = pe * Number(e.valorUnit||0); k.com += pe; k.vCom += v; if (emDev.has(e.protocolo)) { k.dev += pe; k.vDev += v; } });
+  D.devolucoes.forEach(d => { k.falt += int(d.qtdFaltante); k.vFalt += Number(d.valorFaltante||0); k.dan += int(d.qtdDanificada); });
+  k.aguard = D.pedidos.filter(p => stOf(p) === ST.AGUARD).length;
+  k.ocAbertas = D.ocorrencias.filter(o => !/Resolvido|Cancelado/.test(o.status)).length;
+  return k;
+}
+function funcionarios() {
+  const m = {};
+  D.pedidos.forEach(p => { const c = dig(p.cpf); if (!c) return; const f = m[c] = m[c] || { cpf: p.cpf, nome: p.nome, pedidos: [] }; f.pedidos.push(p);
+    if (!f.ult || p.data > f.ult.data) { f.ult = p; f.nome = p.nome; } });
+  return m;
 }
 
-/* ── Montar card ── */
-function montarTimeline(item) {
-    const partes = [];
-    if (item.data)         partes.push(`Pedido: ${item.data}`);
-    if (item.dataPendente) partes.push(`Pendente desde: ${item.dataPendente}`);
-    if (item.dataSeparado) partes.push(`Separado em: ${item.dataSeparado}`);
-    if (item.dataEntrega)  partes.push(`<span class="marco-entregue">Entregue em: ${item.dataEntrega}</span>`);
-    if (partes.length === 0) return "";
-    return `<p class="timeline">${partes.join(" &nbsp;·&nbsp; ")}</p>`;
+/* ───────── navegação ───────── */
+const VIEWS = [
+  ["painel","Painel"],["pedidos","Pedidos"],["estoque","Estoque"],["devolucoes","Devoluções"],["valores","Valores para análise"],
+  ["funcionarios","Funcionários"],["relatorios","Relatórios"],["materiais","Materiais"],["usuarios","Usuários", "admin"]
+];
+function ir(v, f) { VIEW = v; filtros = f || {}; limite = 60; render(); window.scrollTo(0, 0); }
+function render() {
+  if (!D) return;
+  const k = indicadores();
+  const cont = { pedidos: k.aguard, estoque: k.alertas, valores: k.ocAbertas };
+  $("menu").innerHTML = VIEWS.filter(v => !v[2] || EU.perfil === "admin").map(([id, nome]) =>
+    `<button onclick="ir('${id}')" ${VIEW === id ? 'aria-current="page"' : ""}>${nome}${cont[id] ? `<span class="cont ${id === "estoque" ? "alerta" : ""}">${cont[id]}</span>` : ""}</button>`).join("");
+  const fn = { painel: vPainel, pedidos: vPedidos, estoque: vEstoque, devolucoes: vDevolucoes, valores: vValores, funcionarios: vFuncionarios, relatorios: vRelatorios, materiais: vMateriais, usuarios: vUsuarios }[VIEW];
+  fn(k);
+}
+function classeSt(s) {
+  if (/Cancelado|Contestação|ENTREGUE$/.test(s)) return /ENTREGUE/.test(s) ? "ok" : "erro";
+  if (/Entregue ao|concluída|Resolvido|Aprovado administrativamente/.test(s)) return "ok";
+  if (/Aguardando|análise|pendente|Parcial|parcial/.test(s)) return "aviso";
+  return "";
 }
 
-function montarCard(item) {
-    const badgeClass = {
-        "EM ANÁLISE": "badge-em-analise",
-        "PENDENTE":   "badge-pendente",
-        "SEPARADO":   "badge-separado",
-        "ENTREGUE":   "badge-entregue"
-    }[item.status] || "badge-em-analise";
-
-    const opcoes = [
-        ["EM ANÁLISE", "opt-em-analise"],
-        ["PENDENTE",   "opt-pendente"],
-        ["SEPARADO",   "opt-separado"],
-        ["ENTREGUE",   "opt-entregue"]
-    ].map(([s, cls]) =>
-        `<button class="${cls}${item.status===s?" atual":""}"
-                 onclick="alterarStatus(${item.id},'${s}',event)">
-            ${s}${item.status===s?" ✓":""}
-        </button>`
-    ).join("");
-
-    const dropdown = `<div class="statusWrap">
-        <span class="badge ${badgeClass}" onclick="toggleMenu(${item.id},event)">${item.status}</span>
-        <div class="statusMenu" id="menu-${item.id}">${opcoes}</div>
-    </div>`;
-
-    // Fotos — uniformes: array item.fotos | materiais: string item.foto
-    let fotosHtml = "";
-    if (tipoAtual === "materiais" && item.foto && item.foto.length > 10) {
-        fotosHtml = `<div class="fotosBox">
-            <img src="${item.foto}" class="fotoAvaria" onclick="abrirModal(this.src)">
-        </div>`;
-    } else if (tipoAtual === "uniformes" && item.fotos && item.fotos.length > 0) {
-        fotosHtml = `<div class="fotosBox">
-            ${item.fotos.map(f => `<img src="${f}" class="fotoAvaria" onclick="abrirModal(this.src)">`).join("")}
-        </div>`;
-    }
-
-    const ass = item.assinatura && item.assinatura.length > 10
-        ? `<img src="${item.assinatura}" class="assinatura">` : "";
-
-    if (tipoAtual === "materiais") return `
-        <div class="nome">${item.nome||""}</div>
-        ${montarTimeline(item)}
-        <p><b>Protocolo:</b>  ${item.protocolo ||""}</p>
-        <p><b>Cidade:</b>     ${item.cidade    ||""}</p>
-        <p><b>Posto:</b>      ${item.posto     ||""}</p>
-        <p><b>Material:</b>   ${item.material  ||""}</p>
-        <p><b>Quantidade:</b> ${item.quantidade||""}</p>
-        <p><b>Obs:</b>        ${item.observacao||""}</p>
-        ${ass}${fotosHtml}
-        <p><b>Status:</b> ${dropdown}</p>`;
-
-    return `
-        <div class="nome">${item.nome||""}</div>
-        ${montarTimeline(item)}
-        <p><b>Protocolo:</b> ${item.protocolo ||""}</p>
-        <p><b>CPF:</b>       ${item.cpf       ||""}</p>
-        <p><b>Telefone:</b>  ${item.telefone  ||""}</p>
-        <p><b>Cidade:</b>    ${item.cidade    ||""}</p>
-        <p><b>Posto:</b>     ${item.posto     ||""}</p>
-        <p><b>Uniformes:</b><br>${item.uniformes||""}</p>
-        <p><b>Obs:</b>       ${item.observacao||""}</p>
-        ${ass}${fotosHtml}
-        <p><b>Status:</b> ${dropdown}</p>`;
+/* ───────── PAINEL ───────── */
+function vPainel(k) {
+  const alertas = D.pecas.filter(p => p.ativo === "SIM" && p.alertaAtivo === "SIM").sort((a,b) => disp(a) - disp(b));
+  const movs = D.movimentacoes.slice(-12).reverse();
+  $("conteudo").innerHTML = `
+  <h2 class="tit">Painel do estoque</h2><p class="sub">Atualizado ${fData(new Date().toISOString())}. Disponível já desconta as reservas de pedidos aprovados.</p>
+  <div class="kpis">
+    <div class="kpi destaque"><span>Peças disponíveis</span><b>${k.disp}</b><small>${brl(k.vDisp)} livres para pedido</small></div>
+    <div class="kpi"><span>Reservadas para pedidos</span><b>${k.res}</b><small>aguardando retirada</small></div>
+    <div class="kpi"><span>Com os funcionários</span><b>${k.com}</b><small>${brl(k.vCom)} não devolvidos</small></div>
+    <div class="kpi"><span>Em processo de devolução</span><b>${k.dev}</b><small>${brl(k.vDev)} pendentes</small></div>
+    <div class="kpi ${k.falt ? "alerta" : ""}"><span>Não devolvidas</span><b>${k.falt}</b><small>${brl(k.vFalt)} de referência · ${k.dan} danificadas</small></div>
+    <div class="kpi"><span>Em quarentena</span><b>${k.quar}</b><small>aguardando avaliação</small></div>
+    <div class="kpi ${k.aguard ? "alerta" : ""}" style="cursor:pointer" onclick="ir('pedidos',{status:'${ST.AGUARD}'})"><span>Pedidos para aprovar</span><b>${k.aguard}</b><small>clique para ver</small></div>
+    <div class="kpi destaque"><span>Valor total do estoque</span><b class="longo">${brl(k.vEst)}</b><small>saldo físico × valor unitário</small></div>
+  </div>
+  <h3 class="sec">Alertas de estoque <span class="selo ${alertas.length ? "erro" : "ok"}">${alertas.length || "nenhum"}</span></h3>
+  <div class="alertas">${alertas.length ? alertas.map(p => { const d = disp(p); return `
+    <div class="alerta-l ${d <= 0 ? "zero" : ""}"><div><b>${esc(p.nome)} · ${esc(p.tamanho)}</b><div class="meta" style="color:var(--suave);font-size:12.5px">${d <= 0 ? "Sem estoque" : "Estoque baixo"} · mínimo ${minimo(p)} · saldo ${int(p.saldo)}, reservado ${int(p.reservado)}</div></div>
+      <span class="q">${d}</span>
+      <div style="display:flex;gap:6px"><button class="btn peq" onclick="modalMovs('${p.sku}')">Movimentações</button><button class="btn peq p" onclick="modalEstoque('${p.sku}','entrada')">Registrar entrada</button></div></div>`; }).join("")
+    : `<div class="vazio">Nenhuma peça abaixo do mínimo.</div>`}</div>
+  <h3 class="sec">Últimas movimentações</h3>${tabelaMovs(movs)}
+  <button class="btn mais" onclick="ir('estoque',{aba:'hist'})">Ver histórico completo</button>`;
+}
+function tabelaMovs(movs) {
+  if (!movs.length) return `<div class="vazio">Nenhuma movimentação registrada.</div>`;
+  return `<div class="tabela"><table><thead><tr><th>Data</th><th>Peça</th><th>Tipo</th><th class="n">Qtd</th><th class="n">Saldo</th><th class="n">Reserv.</th><th>Responsável</th><th>Motivo / ref.</th></tr></thead><tbody>${
+    movs.map(m => `<tr><td>${fData(m.dataHora)}</td><td>${esc(m.nome)} ${esc(m.tamanho)}</td><td>${esc(TIPOS_MOV[m.tipo] || m.tipo)}</td><td class="n">${m.qtd === 0 ? "" : esc(m.qtd)}</td>
+      <td class="n">${m.saldoAntes === m.saldoDepois ? esc(m.saldoDepois) : `${esc(m.saldoAntes)} → ${esc(m.saldoDepois)}`}</td><td class="n">${m.reservadoAntes === m.reservadoDepois ? esc(m.reservadoDepois) : `${esc(m.reservadoAntes)} → ${esc(m.reservadoDepois)}`}</td>
+      <td>${esc(m.responsavel)}</td><td>${esc(m.motivo)}${m.referencia ? ` · ${esc(m.referencia)}` : ""}</td></tr>`).join("")}</tbody></table></div>`;
 }
 
-/* ── Toggle dropdown de status ── */
-function toggleMenu(id, event) {
-    event.stopPropagation();
-    const menu = document.getElementById(`menu-${id}`);
-    if (menuAberto && menuAberto !== menu) menuAberto.classList.remove("aberto");
-    menu.classList.toggle("aberto");
-    menuAberto = menu.classList.contains("aberto") ? menu : null;
+/* ───────── PEDIDOS ───────── */
+function vPedidos() {
+  const f = filtros, cidades = [...new Set(D.pedidos.map(p => p.cidade).filter(Boolean))].sort();
+  const postos = [...new Set(D.pedidos.filter(p => !f.cidade || p.cidade === f.cidade).map(p => p.posto).filter(Boolean))].sort();
+  const lista = D.pedidos.filter(p => {
+    if (f.status && stOf(p) !== f.status) return false;
+    if (f.cidade && p.cidade !== f.cidade) return false;
+    if (f.posto && p.posto !== f.posto) return false;
+    if (f.de && diaISO(p.data) < f.de) return false;
+    if (f.ate && diaISO(p.data) > f.ate) return false;
+    if (f.q) { const q = norm(f.q); if (!(norm(p.nome).includes(q) || dig(p.cpf).includes(dig(f.q) || "@") || norm(p.protocolo).includes(q))) return false; }
+    if (f.peca) { const q = norm(f.peca); if (!(p.itens ? p.itens.some(i => norm(i.peca).includes(q) || norm(i.tamanho) === q) : norm(p.uniformes).includes(q))) return false; }
+    return true;
+  }).sort((a,b) => String(b.data).localeCompare(String(a.data)));
+  $("conteudo").innerHTML = `
+  <h2 class="tit">Pedidos</h2><p class="sub">${lista.length} pedido(s). Aprovar reserva as peças; a baixa do saldo acontece na entrega conferida.</p>
+  <div class="barra">
+    <label>Buscar<input value="${esc(f.q||"")}" placeholder="Nome, CPF ou protocolo" oninput="filtrar('q',this.value)"></label>
+    <label>Status<select onchange="filtrar('status',this.value,1)"><option value="">Todos</option>${Object.values(ST).map(s => `<option ${f.status===s?"selected":""}>${s}</option>`).join("")}</select></label>
+    <label>Cidade<select onchange="filtrar('cidade',this.value,1)"><option value="">Todas</option>${cidades.map(c => `<option ${f.cidade===c?"selected":""}>${esc(c)}</option>`).join("")}</select></label>
+    <label>Posto<select onchange="filtrar('posto',this.value,1)"><option value="">Todos</option>${postos.map(c => `<option ${f.posto===c?"selected":""}>${esc(c)}</option>`).join("")}</select></label>
+    <label>Peça ou tamanho<input value="${esc(f.peca||"")}" placeholder="Ex.: camisa, 42" oninput="filtrar('peca',this.value)"></label>
+    <label style="max-width:150px">De<input type="date" value="${f.de||""}" onchange="filtrar('de',this.value,1)"></label>
+    <label style="max-width:150px">Até<input type="date" value="${f.ate||""}" onchange="filtrar('ate',this.value,1)"></label>
+  </div>
+  <div class="cards" id="listaPedidos">${lista.slice(0, limite).map(cardPedido).join("") || `<div class="vazio">Nenhum pedido com estes filtros.</div>`}</div>
+  ${lista.length > limite ? `<button class="btn mais" onclick="limite+=60;render()">Mostrar mais (${lista.length - limite})</button>` : ""}`;
+}
+let _ft;
+function filtrar(k, v, ja) { filtros[k] = v; limite = 60; clearTimeout(_ft); const go = () => { const a = document.activeElement, id = a && a.getAttribute("oninput"); render(); if (id) { const el = [...document.querySelectorAll("[oninput]")].find(x => x.getAttribute("oninput") === id); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } } }; ja ? go() : (_ft = setTimeout(go, 250)); }
+function cardPedido(p) {
+  const st = stOf(p), P = `'${esc(p.protocolo)}'`;
+  const itens = p.itens ? `<table><thead><tr><th>Peça</th><th>Tam.</th><th class="n">Pedido</th><th class="n">Reserv.</th><th class="n">Entregue</th></tr></thead><tbody>${
+    p.itens.map(i => `<tr><td>${esc(i.peca)}</td><td>${esc(i.tamanho)}</td><td class="n">${i.qtd}</td><td class="n">${i.reservado||0}</td><td class="n">${i.entregue||0}</td></tr>`).join("")}</tbody></table>`
+    : `<div class="meta">Pedido antigo: ${esc(p.uniformes)}</div>`;
+  const a = [];
+  if (p.legado) a.push(`<select style="width:auto;min-height:30px" onchange="statusLegado(${P},this.value)"><option value="">Mudar status…</option>${Object.values(ST).map(s => `<option>${s}</option>`).join("")}</select>`);
+  else {
+    if (st === ST.AGUARD) a.push(`<button class="btn peq p" onclick="aprovar(${P})">Aprovar e reservar</button>`);
+    if (st === ST.APROV) a.push(`<button class="btn peq" onclick="mudar(${P},'${ST.SEPAR}')">Separando peças</button>`);
+    if ([ST.APROV, ST.SEPAR].includes(st)) a.push(`<button class="btn peq" onclick="mudar(${P},'${ST.DISP}')">Disponível para retirada</button>`);
+    if ([ST.APROV, ST.SEPAR, ST.DISP, ST.ENTPARC].includes(st)) a.push(`<button class="btn peq p" onclick="modalEntrega(${P})">Conferir e entregar</button>`);
+    if ([ST.ENTREG, ST.ENTPARC, ST.DEVPARC].includes(st)) a.push(`<button class="btn peq" onclick="mudar(${P},'${ST.DEVPEND}')">Marcar devolução pendente</button>`);
+    if ([ST.ENTREG, ST.ENTPARC, ST.DEVPEND, ST.DEVPARC].includes(st)) a.push(`<button class="btn peq" onclick="ir('devolucoes',{cpf:'${dig(p.cpf)}'})">Conferir devolução</button>`);
+    if ([ST.AGUARD, ST.APROV, ST.SEPAR, ST.DISP].includes(st)) a.push(`<button class="btn peq perigo" onclick="cancelar(${P})">Cancelar</button>`);
+    if (st === ST.ENTPARC) a.push(`<button class="btn peq perigo" onclick="cancelar(${P},1)">Encerrar restante</button>`);
+  }
+  a.push(`<button class="btn peq" onclick="verAnexos(${P})">Assinatura e foto</button>`);
+  a.push(`<button class="btn peq" onclick="ir('funcionarios',{cpf:'${dig(p.cpf)}'})">Ficha</button>`);
+  return `<article class="card"><header><div><b>${esc(p.protocolo || "sem protocolo")}</b><div>${esc(p.nome)}</div></div><span class="selo ${classeSt(st)}">${esc(st)}</span></header>
+    <div class="meta">${fData(p.data)} · CPF ${esc(p.cpf)} · ${esc(p.telefone)}<br>${esc(p.cidade || "cidade não informada")} · ${esc(p.posto)}${p.funcao ? " · " + esc(p.funcao) : ""}</div>
+    ${itens}${p.obs ? `<div class="meta">Obs.: ${esc(p.obs)}</div>` : ""}
+    ${p.historico && p.historico.length ? `<details class="hist"><summary>Histórico (${p.historico.length})</summary><ol>${p.historico.map(h => `<li>${fData(h.em)} · ${esc(h.status)} · ${esc(h.por)}${h.evento ? " · " + esc(h.evento) : ""}</li>`).join("")}</ol></details>` : ""}
+    <div class="acoes">${a.join("")}</div></article>`;
+}
+async function executar(acao, dados, msgOk) {
+  try { const r = await api(acao, dados); if (!r.sucesso) { toast(r.erro || "Não foi possível concluir.", true); return r; } if (msgOk) toast(msgOk); return r; }
+  catch (e) { toast(e.message, true); return { sucesso: false, erro: e.message }; }
+}
+async function aprovar(prot, parcial) {
+  const r = await executar("aprovar", { protocolo: prot, parcial: !!parcial }, "Pedido aprovado e peças reservadas.");
+  if (r.falta) modal(`<h3>Estoque não cobre o pedido inteiro</h3><p class="sub">${esc(prot)}</p>
+    <div class="tabela"><table><thead><tr><th>Peça</th><th>Tam.</th><th class="n">Falta reservar</th><th class="n">Disponível</th></tr></thead><tbody>${
+      r.falta.map(f => `<tr><td>${esc(f.peca)}</td><td>${esc(f.tamanho)}</td><td class="n">${f.pedido}</td><td class="n">${f.disponivel}</td></tr>`).join("")}</tbody></table></div>
+    <div class="aviso-m">Aprovar com reserva parcial reserva o que existe hoje. O restante fica pendente e pode ser entregue depois de uma entrada no estoque.</div>
+    <div class="rodape"><button class="btn" onclick="fecharModal()">Voltar</button><button class="btn p" onclick="fecharModal();aprovar('${esc(prot)}',1)">Aprovar com reserva parcial</button></div>`);
+}
+const mudar = (prot, status) => executar("status", { protocolo: prot, status }, "Status: " + status);
+function statusLegado(prot, status) { if (status) executar("status", { protocolo: prot, status }, "Status: " + status); }
+function cancelar(prot, encerrar) {
+  modal(`<h3>${encerrar ? "Encerrar o restante do pedido" : "Cancelar pedido"}</h3><p class="sub">${esc(prot)} · as reservas voltam para o estoque disponível.</p>
+    <label class="c">Motivo<textarea id="mMotivo" maxlength="300"></textarea></label><div class="erro-m" id="mErro" hidden></div>
+    <div class="rodape"><button class="btn" onclick="fecharModal()">Voltar</button><button class="btn perigo" onclick="confirmarCancelar('${esc(prot)}')">${encerrar ? "Encerrar restante" : "Cancelar pedido"}</button></div>`);
+}
+async function confirmarCancelar(prot) {
+  const motivo = $("mMotivo").value.trim(); if (!motivo) return erroModal("Informe o motivo.");
+  const r = await executar("cancelar", { protocolo: prot, motivo }, "Pedido atualizado e reservas liberadas."); if (r.sucesso) fecharModal(); else erroModal(r.erro);
+}
+async function verAnexos(prot) {
+  modal(`<h3>Assinatura e foto</h3><p class="sub">${esc(prot)}</p><div id="anx">Carregando…</div><div class="rodape"><button class="btn" onclick="fecharModal()">Fechar</button></div>`);
+  try { const r = await api("anexos", { protocolo: prot }); if (!r.sucesso) throw new Error(r.erro);
+    $("anx").innerHTML = `${r.assinatura ? `<img src="${esc(r.assinatura)}" style="max-width:100%;background:#fff;border-radius:6px" alt="Assinatura">` : "<p>Sem assinatura.</p>"}
+      ${r.fotos.map(f => `<a href="${esc(f)}" target="_blank" rel="noopener"><img src="${esc(f)}" style="max-width:100%;margin-top:12px;border-radius:6px" alt="Foto anexada"></a>`).join("")}`;
+  } catch (e) { $("anx").textContent = e.message; }
 }
 
-/* ── Alterar status ── */
-async function alterarStatus(id, novoStatus, event) {
-    event.stopPropagation();
-    const item = dadosGlobais.find(i => i.id === id);
-    if (!item || item.status === novoStatus) return;
-    if (menuAberto) { menuAberto.classList.remove("aberto"); menuAberto = null; }
-
-    toast("Salvando...", "#555");
-    item.status = novoStatus;
-    const card = document.getElementById(`card-${id}`);
-    if (card) card.innerHTML = montarCard(item);
-    atualizarContadores();
-
-    try {
-        const url = `${URL_SCRIPT}?func=atualizarStatus&tipo=${tipoAtual}&id=${id}&status=${encodeURIComponent(novoStatus)}`;
-        const res  = await fetch(url);
-        const json = await res.json();
-        if (json.sucesso) {
-            toast("✓ " + novoStatus, "#22c55e");
-        } else {
-            throw new Error(json.erro || json.mensagem || "Erro desconhecido");
-        }
-    } catch(err) {
-        toast("Erro: " + err.message, "#ef4444");
-        carregar();
-    }
+/* entrega com checklist */
+function modalEntrega(prot) {
+  const p = pedidoDe(prot);
+  const linhas = p.itens.map((it, idx) => ({ it, idx, pend: it.qtd - int(it.entregue) })).filter(l => l.pend > 0);
+  const peca = sku => D.pecas.find(x => x.sku === sku) || {};
+  modal(`<h3>Conferência de entrega</h3><p class="sub">${esc(p.protocolo)} · ${esc(p.nome)} · CPF ${esc(p.cpf)} · ${esc(p.posto)}</p>
+    <div class="tabela chk"><table><thead><tr><th>Conferido</th><th>Peça</th><th>Tam.</th><th class="n">Solicit.</th><th class="n">Já entregue</th><th class="n">Reserv.</th><th class="n">Entregar agora</th><th>Estado</th><th>Obs.</th></tr></thead><tbody>${
+      linhas.map(l => { const pc = peca(l.it.sku), max = Math.min(l.pend, int(l.it.reservado) + Math.max(0, disp(pc)));
+        return `<tr data-idx="${l.idx}" data-max="${max}"><td><input type="checkbox" class="e-ok" aria-label="Conferido"></td><td>${esc(l.it.peca)}</td><td>${esc(l.it.tamanho)}</td><td class="n">${l.it.qtd}</td><td class="n">${int(l.it.entregue)}</td><td class="n">${int(l.it.reservado)}</td>
+          <td class="n"><input type="number" class="e-q" min="0" max="${max}" value="${max}"></td>
+          <td><select class="e-est" style="min-width:110px"><option>Nova</option><option>Usada</option></select></td><td><input class="e-obs" maxlength="300" style="min-width:140px"></td></tr>`; }).join("")}</tbody></table></div>
+    <div class="aviso-m">Marque cada peça conferida. Peças com quantidade 0 ou abaixo do pedido ficam pendentes no pedido.</div>
+    <div class="grade2" style="margin-top:12px"><label class="c">Responsável pela entrega<input value="${esc(EU.nome)}" disabled></label><label class="c">Observação geral<input id="eObs" maxlength="300"></label></div>
+    <div class="erro-m" id="mErro" hidden></div>
+    <div class="rodape"><button class="btn" onclick="marcarTodos()">Marcar todos conferidos</button><button class="btn" onclick="fecharModal()">Voltar</button><button class="btn p" id="eBtn" onclick="confirmarEntrega('${esc(prot)}')">Confirmar entrega</button></div>`, true);
+}
+function marcarTodos() { document.querySelectorAll(".e-ok").forEach(c => c.checked = true); }
+async function confirmarEntrega(prot) {
+  const itens = [...document.querySelectorAll(".chk tbody tr")].map(tr => ({ idx: int(tr.dataset.idx), qtd: int(tr.querySelector(".e-q").value),
+    conferido: tr.querySelector(".e-ok").checked, estado: tr.querySelector(".e-est").value, obs: tr.querySelector(".e-obs").value, max: int(tr.dataset.max), tr }));
+  for (const i of itens) { i.tr.classList.remove("err"); if (i.qtd > i.max || i.qtd < 0) { i.tr.classList.add("err"); return erroModal(`Quantidade acima do disponível (máximo ${i.max}).`); }
+    if (i.qtd > 0 && !i.conferido) { i.tr.classList.add("err"); return erroModal("Marque como conferida cada peça que está sendo entregue."); } }
+  if (!itens.some(i => i.qtd > 0)) return erroModal("Informe ao menos uma quantidade entregue.");
+  $("eBtn").disabled = true;
+  const r = await executar("entregar", { protocolo: prot, itens: itens.map(({ tr, max, ...x }) => x), obs: $("eObs").value }, "Entrega registrada e saldo baixado.");
+  $("eBtn") && ($("eBtn").disabled = false);
+  if (!r.sucesso) return erroModal(r.erro);
+  const p = pedidoDe(prot);
+  modal(`<h3>Entrega registrada</h3><p class="sub">${esc(prot)} · ${esc(r.status)}</p>
+    <div class="tabela"><table><thead><tr><th>Peça</th><th>Tam.</th><th class="n">Qtd</th><th class="n">Valor ref.</th></tr></thead><tbody>${r.itens.map(i => `<tr><td>${esc(i.peca)}</td><td>${esc(i.tamanho)}</td><td class="n">${i.qtdEntregue}</td><td class="n">${brl(i.qtdEntregue * i.valorUnit)}</td></tr>`).join("")}</tbody></table></div>
+    <div class="rodape"><button class="btn" onclick="fecharModal()">Fechar</button><button class="btn p" id="bComp">Baixar comprovante</button></div>`);
+  $("bComp").onclick = () => pdfEntrega(p, r);
 }
 
-/* ── Contadores ── */
-function atualizarContadores() {
-    const filtroSts = document.getElementById("filtroStatus").value;
-    let total=0, analise=0, pend=0, sep=0, ent=0;
-    dadosGlobais.forEach(item => {
-        if (filtroSts && item.status !== filtroSts) return;
-        total++;
-        if (item.status === "EM ANÁLISE") analise++;
-        if (item.status === "PENDENTE")   pend++;
-        if (item.status === "SEPARADO")   sep++;
-        if (item.status === "ENTREGUE")   ent++;
-    });
-    document.getElementById("total").innerText        = "Total: "      + total;
-    document.getElementById("stAnalise").innerText    = "Em análise: " + analise;
-    document.getElementById("stPendentes").innerText  = "Pendentes: "  + pend;
-    document.getElementById("stSeparados").innerText  = "Separados: "  + sep;
-    document.getElementById("stEntregues").innerText  = "Entregues: "  + ent;
-    atualizarGrafico(analise, pend, sep, ent);
-    atualizarRanking();
+/* ───────── ESTOQUE ───────── */
+function vEstoque() {
+  const f = filtros, aba = f.aba || "saldo";
+  const tabs = `<div class="barra" style="margin-bottom:6px"><div class="acoes" style="margin-left:0">${[["saldo","Saldos"],["quar","Quarentena"],["hist","Histórico de movimentações"]].map(([id, n]) =>
+    `<button class="btn ${aba === id ? "p" : ""}" onclick="filtros.aba='${id}';render()">${n}</button>`).join("")}</div>
+    <div class="acoes"><button class="btn p" onclick="modalCadastro()">Cadastrar peça</button></div></div>`;
+  if (aba === "hist") return vHistorico(tabs);
+  if (aba === "quar") {
+    const q = D.pecas.filter(p => int(p.quarentena) > 0);
+    $("conteudo").innerHTML = `<h2 class="tit">Estoque</h2><p class="sub">Peças devolvidas danificadas ficam aqui até alguém decidir: liberar para uso ou inutilizar.</p>${tabs}
+      ${q.length ? `<div class="tabela"><table><thead><tr><th>Peça</th><th>Tam.</th><th class="n">Em quarentena</th><th class="n">Valor</th><th></th></tr></thead><tbody>${q.map(p => `<tr><td>${esc(p.nome)}</td><td>${esc(p.tamanho)}</td><td class="n">${int(p.quarentena)}</td><td class="n">${brl(int(p.quarentena)*Number(p.valorUnit||0))}</td>
+      <td class="n"><button class="btn peq" onclick="modalEstoque('${p.sku}','liberar_quarentena')">Liberar para uso</button> <button class="btn peq perigo" onclick="modalEstoque('${p.sku}','inutilizar_quarentena')">Inutilizar</button></td></tr>`).join("")}</tbody></table></div>`
+      : `<div class="vazio">Nenhuma peça em quarentena.</div>`}`;
+    return;
+  }
+  const cats = [...new Set(D.pecas.map(p => p.categoria).filter(Boolean))].sort();
+  const tams = [...new Set(D.pecas.map(p => String(p.tamanho)))].sort((a,b) => (isNaN(a)||isNaN(b)) ? a.localeCompare(b) : a - b);
+  const lista = D.pecas.filter(p => (f.inativas || p.ativo === "SIM") && (!f.cat || p.categoria === f.cat) && (!f.tam || String(p.tamanho) === f.tam)
+    && (!f.so || p.alertaAtivo === "SIM") && (!f.q || norm(p.nome + " " + p.sku).includes(norm(f.q))))
+    .sort((a,b) => a.nome.localeCompare(b.nome) || String(a.tamanho).localeCompare(String(b.tamanho), "pt-BR", { numeric: true }));
+  const tot = lista.reduce((s,p) => s + int(p.saldo) * Number(p.valorUnit||0), 0);
+  $("conteudo").innerHTML = `<h2 class="tit">Estoque</h2><p class="sub">${lista.length} item(ns) · ${brl(tot)} em estoque. Cada tamanho tem saldo próprio.</p>${tabs}
+  <div class="barra">
+    <label>Buscar<input value="${esc(f.q||"")}" placeholder="Nome ou SKU" oninput="filtrar('q',this.value)"></label>
+    <label>Categoria<select onchange="filtrar('cat',this.value,1)"><option value="">Todas</option>${cats.map(c => `<option ${f.cat===c?"selected":""}>${esc(c)}</option>`).join("")}</select></label>
+    <label>Tamanho<select onchange="filtrar('tam',this.value,1)"><option value="">Todos</option>${tams.map(c => `<option ${f.tam===c?"selected":""}>${esc(c)}</option>`).join("")}</select></label>
+    <label style="flex-direction:row;align-items:center;gap:8px;flex:0 0 auto"><input type="checkbox" ${f.so?"checked":""} onchange="filtrar('so',this.checked,1)">Só alertas</label>
+    <label style="flex-direction:row;align-items:center;gap:8px;flex:0 0 auto"><input type="checkbox" ${f.inativas?"checked":""} onchange="filtrar('inativas',this.checked,1)">Mostrar inativas</label>
+  </div>
+  ${lista.length ? `<div class="tabela"><table><thead><tr><th>Peça</th><th>Tam.</th><th>Categoria</th><th class="n">Saldo</th><th class="n">Reserv.</th><th class="n">Disponível</th><th class="n">Mín.</th><th class="n">Quar.</th><th class="n">Valor unit.</th><th class="n">Total</th><th>Estado</th><th></th></tr></thead><tbody>${
+    lista.map(p => { const d = disp(p); return `<tr class="${p.ativo !== "SIM" ? "" : d <= 0 ? "zero" : d <= minimo(p) ? "baixo" : ""}">
+      <td>${esc(p.nome)}${p.ativo !== "SIM" ? ' <span class="selo">inativa</span>' : ""}<div style="font-size:11.5px;color:var(--fraco)">${esc(p.sku)}</div></td><td>${esc(p.tamanho)}</td><td>${esc(p.categoria)}</td>
+      <td class="n">${int(p.saldo)}</td><td class="n">${int(p.reservado)}</td><td class="n"><b>${d}</b></td><td class="n">${minimo(p)}</td><td class="n">${int(p.quarentena)||""}</td>
+      <td class="n">${brl(p.valorUnit)}</td><td class="n">${brl(int(p.saldo)*Number(p.valorUnit||0))}</td><td>${esc(p.estado)}</td>
+      <td class="n" style="white-space:nowrap"><button class="btn peq p" onclick="modalEstoque('${p.sku}','entrada')">Entrada</button> <button class="btn peq" onclick="modalEstoque('${p.sku}','baixa')">Baixa</button>
+        ${EU.perfil === "admin" ? `<button class="btn peq" onclick="modalEstoque('${p.sku}','ajuste')">Ajuste</button>` : ""} <button class="btn peq" onclick="modalEditar('${p.sku}')">Editar</button> <button class="btn peq" onclick="modalMovs('${p.sku}')">Mov.</button></td></tr>`; }).join("")}</tbody></table></div>`
+    : `<div class="vazio">Nenhuma peça encontrada. Use "Cadastrar peça" para começar o estoque.</div>`}`;
+}
+function vHistorico(tabs) {
+  const f = filtros;
+  const resp = [...new Set(D.movimentacoes.map(m => m.responsavel))].sort();
+  const lista = D.movimentacoes.filter(m => (!f.tipo || m.tipo === f.tipo) && (!f.resp || m.responsavel === f.resp)
+    && (!f.de || diaISO(m.dataHora) >= f.de) && (!f.ate || diaISO(m.dataHora) <= f.ate)
+    && (!f.q || norm(m.nome + " " + m.tamanho + " " + m.sku + " " + m.referencia).includes(norm(f.q)))).reverse();
+  $("conteudo").innerHTML = `<h2 class="tit">Estoque</h2><p class="sub">${lista.length} movimentação(ões). Cada linha guarda saldo anterior e posterior.</p>${tabs}
+  <div class="barra">
+    <label>Peça ou protocolo<input value="${esc(f.q||"")}" oninput="filtrar('q',this.value)"></label>
+    <label>Tipo<select onchange="filtrar('tipo',this.value,1)"><option value="">Todos</option>${Object.entries(TIPOS_MOV).map(([k,v]) => `<option value="${k}" ${f.tipo===k?"selected":""}>${v}</option>`).join("")}</select></label>
+    <label>Responsável<select onchange="filtrar('resp',this.value,1)"><option value="">Todos</option>${resp.map(r => `<option ${f.resp===r?"selected":""}>${esc(r)}</option>`).join("")}</select></label>
+    <label style="max-width:150px">De<input type="date" value="${f.de||""}" onchange="filtrar('de',this.value,1)"></label>
+    <label style="max-width:150px">Até<input type="date" value="${f.ate||""}" onchange="filtrar('ate',this.value,1)"></label>
+  </div>${tabelaMovs(lista.slice(0, limite * 3))}
+  ${lista.length > limite * 3 ? `<button class="btn mais" onclick="limite+=60;render()">Mostrar mais</button>` : ""}`;
+}
+function modalMovs(sku) {
+  const p = D.pecas.find(x => x.sku === sku), movs = D.movimentacoes.filter(m => m.sku === sku).reverse();
+  modal(`<h3>Movimentações</h3><p class="sub">${esc(p.nome)} ${esc(p.tamanho)} · saldo ${int(p.saldo)}, reservado ${int(p.reservado)}, disponível ${disp(p)}</p>${tabelaMovs(movs)}
+    <div class="rodape"><button class="btn" onclick="fecharModal()">Fechar</button><button class="btn p" onclick="modalEstoque('${sku}','entrada')">Registrar entrada</button></div>`, true);
+}
+function modalEstoque(sku, tipo) {
+  const p = D.pecas.find(x => x.sku === sku);
+  const cfg = {
+    entrada: ["Entrada de peças", "Quantidade recebida", "Nota fiscal, fornecedor ou origem", false],
+    baixa: ["Baixa por dano ou extravio", "Quantidade", "Motivo da baixa", true],
+    ajuste: ["Ajuste manual de saldo", "Saldo correto após contagem", "Justificativa (obrigatória)", true],
+    liberar_quarentena: ["Liberar peças da quarentena", "Quantidade", "Avaliação", false],
+    inutilizar_quarentena: ["Inutilizar peças da quarentena", "Quantidade", "Motivo do descarte", true]
+  }[tipo];
+  modal(`<h3>${cfg[0]}</h3><p class="sub">${esc(p.nome)} ${esc(p.tamanho)} · saldo ${int(p.saldo)} · reservado ${int(p.reservado)} · quarentena ${int(p.quarentena)}</p>
+    ${tipo === "baixa" ? `<label class="c" style="margin-bottom:12px">Tipo<select id="mTipo"><option value="baixa_dano">Dano</option><option value="baixa_extravio">Extravio</option></select></label>` : ""}
+    <div class="grade2"><label class="c">${cfg[1]}<input type="number" id="mQtd" min="0" value="${tipo === "ajuste" ? int(p.saldo) : ""}"></label><label class="c">Responsável<input value="${esc(EU.nome)}" disabled></label></div>
+    <label class="c" style="margin-top:12px">${cfg[2]}<textarea id="mMotivo" maxlength="300"></textarea></label>
+    ${tipo === "ajuste" ? `<div class="aviso-m">O saldo não pode ficar abaixo das reservas ativas (${int(p.reservado)}). O ajuste fica registrado com a sua identificação.</div>` : ""}
+    <div class="erro-m" id="mErro" hidden></div>
+    <div class="rodape"><button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn p" id="mBtn" onclick="confirmarEstoque('${sku}','${tipo}')">Salvar</button></div>`);
+  setTimeout(() => $("mQtd").focus(), 30);
+}
+async function confirmarEstoque(sku, tipo) {
+  const qtd = int($("mQtd").value), motivo = $("mMotivo").value.trim();
+  const t = tipo === "baixa" ? $("mTipo").value : tipo;
+  if (tipo !== "ajuste" && qtd < 1) return erroModal("Informe uma quantidade maior que zero.");
+  $("mBtn").disabled = true;
+  const r = await executar("estoque", { sku, tipo: t, qtd, novoSaldo: qtd, motivo }, "Movimentação registrada.");
+  if (r.sucesso) fecharModal(); else { erroModal(r.erro); $("mBtn").disabled = false; }
+}
+function modalCadastro() {
+  modal(`<h3>Cadastrar peça</h3><p class="sub">Um cadastro cria um saldo para cada tamanho. Use o mesmo nome do kit do posto para a peça aparecer no formulário do funcionário.</p>
+    <div class="grade2"><label class="c">Nome da peça<input id="cNome" list="dlNomes" maxlength="80"></label>
+      <label class="c">Categoria<input id="cCat" list="dlCats" maxlength="40"></label></div>
+    <datalist id="dlNomes">${[...new Set(NOMES_KIT.concat(D.pecas.map(p => p.nome)))].sort().map(n => `<option>${esc(n)}</option>`).join("")}</datalist>
+    <datalist id="dlCats">${[...new Set(CATEGORIAS.concat(D.pecas.map(p => p.categoria)))].map(n => `<option>${esc(n)}</option>`).join("")}</datalist>
+    <div class="grade3" style="margin-top:12px"><label class="c">Valor unitário (R$)<input type="number" id="cValor" min="0" step="0.01" ${EU.perfil === "admin" ? "" : 'placeholder="definido pelo admin"'}></label>
+      <label class="c">Estoque mínimo<input type="number" id="cMin" min="0" value="5"></label>
+      <label class="c">Estado<select id="cEstado"><option>Nova</option><option>Usada</option></select></label></div>
+    <h3 class="sec" style="font-size:17px;margin-top:18px">Tamanhos e quantidade inicial</h3>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${[["P a GG","P,M,G,GG"],["P a EXG","PP,P,M,G,GG,EG,EXG"],["Calça 36–56","36-56:2"],["Calçado 34–46","34-46"],["Camisa social N2–N8","N2,N3,N4,N5,N6,N7,N8"],["Único","Único"]].map(([n,v]) =>
+      `<button class="btn peq" onclick="gradePreset('${v}')">${n}</button>`).join("")}</div>
+    <div class="tabela"><table><thead><tr><th>Tamanho</th><th>Qtd inicial</th><th></th></tr></thead><tbody id="cGrade"></tbody></table></div>
+    <button class="btn peq" style="margin-top:8px" onclick="gradeLinha()">Adicionar tamanho</button>
+    <label class="c" style="margin-top:12px">Observações<input id="cObs" maxlength="300"></label>
+    <div class="erro-m" id="mErro" hidden></div>
+    <div class="rodape"><button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn p" id="mBtn" onclick="confirmarCadastro()">Cadastrar</button></div>`);
+  gradeLinha();
+}
+function gradeLinha(t = "", q = "") {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td><input class="g-t" value="${esc(t)}" placeholder="Ex.: M, 42 ou 36-56:2"></td><td><input class="g-q" type="number" min="0" value="${esc(q)}" placeholder="0"></td><td class="n"><button class="btn peq" onclick="this.closest('tr').remove()">Remover</button></td>`;
+  $("cGrade").appendChild(tr);
+}
+function gradePreset(v) {
+  $("cGrade").innerHTML = "";
+  v.split(",").forEach(x => { const m = x.match(/^(\d+)-(\d+)(?::(\d+))?$/); if (m) for (let n = +m[1]; n <= +m[2]; n += +(m[3]||1)) gradeLinha(String(n)); else gradeLinha(x); });
+}
+async function confirmarCadastro() {
+  const grade = [...document.querySelectorAll("#cGrade tr")].map(tr => ({ tamanho: tr.querySelector(".g-t").value.trim(), qtd: int(tr.querySelector(".g-q").value) })).filter(g => g.tamanho);
+  const nome = $("cNome").value.trim();
+  if (!nome) return erroModal("Informe o nome da peça.");
+  if (!grade.length) return erroModal("Informe ao menos um tamanho (use Único para peças sem tamanho).");
+  $("mBtn").disabled = true;
+  const r = await executar("cadastrarPecas", { nome, categoria: $("cCat").value.trim(), valorUnit: $("cValor").value || 0, minimo: $("cMin").value, estado: $("cEstado").value, obs: $("cObs").value, grade },
+    "Peça cadastrada.");
+  if (r.sucesso) { fecharModal(); toast(`${r.criados.length} tamanho(s) cadastrado(s).`); } else { erroModal(r.erro); $("mBtn").disabled = false; }
+}
+function modalEditar(sku) {
+  const p = D.pecas.find(x => x.sku === sku), adm = EU.perfil === "admin";
+  modal(`<h3>Editar peça</h3><p class="sub">${esc(p.nome)} ${esc(p.tamanho)} · ${esc(p.sku)}</p>
+    <div class="grade2"><label class="c">Categoria<input id="eCat" value="${esc(p.categoria)}" list="dlC2"></label><datalist id="dlC2">${CATEGORIAS.map(c => `<option>${c}</option>`).join("")}</datalist>
+      <label class="c">Valor unitário (R$)${adm ? "" : " · só administrador"}<input type="number" id="eValor" min="0" step="0.01" value="${Number(p.valorUnit||0)}" ${adm ? "" : "disabled"}></label>
+      <label class="c">Estoque mínimo<input type="number" id="eMin" min="0" value="${minimo(p)}"></label>
+      <label class="c">Estado<select id="eEst">${["Nova","Usada","Danificada","Inutilizada"].map(s => `<option ${p.estado===s?"selected":""}>${s}</option>`).join("")}</select></label></div>
+    <label class="c" style="margin-top:12px">Observações<input id="eObs2" value="${esc(p.obs)}" maxlength="300"></label>
+    <label style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="eAtivo" ${p.ativo === "SIM" ? "checked" : ""}>Ativa (aparece no formulário do funcionário)</label>
+    ${adm ? `<div class="aviso-m">Mudar o preço não altera o valor das entregas já registradas: cada entrega guarda o valor vigente no dia.</div>` : ""}
+    <div class="erro-m" id="mErro" hidden></div>
+    <div class="rodape"><button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn p" id="mBtn" onclick="confirmarEditar('${sku}')">Salvar</button></div>`);
+}
+async function confirmarEditar(sku) {
+  const d = { sku, categoria: $("eCat").value, minimo: $("eMin").value, estado: $("eEst").value, obs: $("eObs2").value, ativo: $("eAtivo").checked };
+  if (EU.perfil === "admin") d.valorUnit = $("eValor").value;
+  $("mBtn").disabled = true;
+  const r = await executar("editarPeca", d, "Peça atualizada."); if (r.sucesso) fecharModal(); else { erroModal(r.erro); $("mBtn").disabled = false; }
 }
 
-/* ── Gráfico ── */
-function atualizarGrafico(a, p, s, e) {
-    const ctx = document.getElementById("graficoStatus");
-    if (grafico) grafico.destroy();
-    grafico = new Chart(ctx, {
-        type: "pie",
-        data: {
-            labels: ["Em análise","Pendentes","Separados","Entregues"],
-            datasets: [{ data: [a,p,s,e], backgroundColor: ["#f97316","#facc15","#3b82f6","#22c55e"] }]
-        }
-    });
+/* ───────── DEVOLUÇÕES ───────── */
+function vDevolucoes() {
+  const f = filtros;
+  if (f.cpf) return vChecklistDevolucao(f.cpf);
+  const m = {};
+  D.entregas.forEach(e => { const pe = pendEnt(e); if (pe <= 0) return; const c = dig(e.cpf);
+    const x = m[c] = m[c] || { cpf: e.cpf, nome: e.nome, qtd: 0, valor: 0, posto: e.posto, prots: new Set() }; x.qtd += pe; x.valor += pe * Number(e.valorUnit||0); x.prots.add(e.protocolo); });
+  const devPend = new Set(D.pedidos.filter(p => [ST.DEVPEND, ST.DEVPARC].includes(p.status)).map(p => dig(p.cpf)));
+  const lista = Object.entries(m).filter(([c, x]) => !f.q || norm(x.nome).includes(norm(f.q)) || c.includes(dig(f.q) || "@"))
+    .sort((a,b) => (devPend.has(b[0]) - devPend.has(a[0])) || a[1].nome.localeCompare(b[1].nome));
+  $("conteudo").innerHTML = `<h2 class="tit">Devoluções</h2><p class="sub">Funcionários com peças entregues e ainda não devolvidas. Os marcados como devolução pendente aparecem primeiro.</p>
+    <div class="barra"><label>Buscar funcionário<input value="${esc(f.q||"")}" placeholder="Nome ou CPF" oninput="filtrar('q',this.value)"></label></div>
+    ${lista.length ? `<div class="tabela"><table><thead><tr><th>Funcionário</th><th>CPF</th><th>Posto</th><th class="n">Peças com ele</th><th class="n">Valor</th><th>Situação</th><th></th></tr></thead><tbody>${
+      lista.map(([c, x]) => `<tr><td>${esc(x.nome)}</td><td>${esc(x.cpf)}</td><td>${esc(x.posto)}</td><td class="n">${x.qtd}</td><td class="n">${brl(x.valor)}</td>
+        <td>${devPend.has(c) ? '<span class="selo aviso">Devolução pendente</span>' : '<span class="selo">Em uso</span>'}</td><td class="n"><button class="btn peq p" onclick="ir('devolucoes',{cpf:'${c}'})">Conferir devolução</button></td></tr>`).join("")}</tbody></table></div>`
+      : `<div class="vazio">Nenhuma peça pendente de devolução.</div>`}`;
+}
+function vChecklistDevolucao(cpf) {
+  const ents = D.entregas.filter(e => dig(e.cpf) === cpf && pendEnt(e) > 0).sort((a,b) => String(a.dataHora).localeCompare(String(b.dataHora)));
+  const nome = (ents[0] || D.pedidos.find(p => dig(p.cpf) === cpf) || {}).nome || "";
+  $("conteudo").innerHTML = `<button class="btn peq" onclick="ir('devolucoes')">Voltar à lista</button>
+    <h2 class="tit" style="margin-top:12px">Conferência de devolução</h2><p class="sub">${esc(nome)} · CPF ${esc(cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4"))}</p>
+    ${ents.length ? `
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap"><button class="btn peq" onclick="devTudo('boa')">Tudo devolvido em boas condições</button><button class="btn peq" onclick="devTudo('faltante')">Nada foi devolvido</button><button class="btn peq" onclick="devTudo('')">Limpar</button></div>
+    <div class="tabela chk"><table><thead><tr><th>Peça</th><th>Entrega</th><th class="n">Entregue</th><th class="n">Pendente</th><th class="n">Valor unit.</th>
+      <th class="n">Boas</th><th class="n">Desgaste normal</th><th class="n">Danificadas</th><th class="n">Não devolvidas</th><th class="n">Valor ref.</th><th>Dano / obs.</th></tr></thead><tbody>${
+      ents.map(e => `<tr data-id="${e.id}" data-pend="${pendEnt(e)}" data-v="${Number(e.valorUnit||0)}">
+        <td>${esc(e.peca)} ${esc(e.tamanho)}</td><td>${esc(e.protocolo)}<div style="font-size:11.5px;color:var(--fraco)">${fDia(e.dataHora)} · ${esc(e.responsavel)}</div></td>
+        <td class="n">${int(e.qtdEntregue)}</td><td class="n">${pendEnt(e)}</td><td class="n">${brl(e.valorUnit)}</td>
+        ${["boa","desgaste","danificada","faltante"].map(k => `<td class="n"><input type="number" min="0" max="${pendEnt(e)}" class="d-${k}" value="0" oninput="calcDev()"></td>`).join("")}
+        <td class="n d-val">${brl(0)}</td>
+        <td><div class="d-dano" hidden><input type="number" class="d-vd" min="0" step="0.01" placeholder="Prejuízo estimado R$" oninput="calcDev()"><input class="d-md" placeholder="Descreva o dano" maxlength="300" style="margin-top:4px"></div><input class="d-obs" placeholder="Observação" maxlength="300" style="margin-top:4px;min-width:150px"></td></tr>`).join("")}</tbody></table></div>
+    <div class="grade3" style="margin-top:14px">
+      <div class="kpi"><span>Faltantes (qtd × valor da entrega)</span><b id="dvF">${brl(0)}</b></div>
+      <div class="kpi"><span>Danos estimados (avaliação separada)</span><b id="dvD">${brl(0)}</b></div>
+      <div class="kpi destaque"><span>Valor de referência para análise</span><b id="dvT">${brl(0)}</b></div>
+    </div>
+    <div class="aviso-m">Este valor é uma referência para análise, não um desconto autorizado. Ele vira uma ocorrência "Em análise" que depende de revisão, aprovação de um administrador e permite contestação do funcionário.</div>
+    <div class="grade2" style="margin-top:12px"><label class="c">Responsável pela conferência<input value="${esc(EU.nome)}" disabled></label>
+      <label class="c">Foto comprobatória (opcional)<input type="file" accept="image/*" id="dvFoto"></label></div>
+    <div class="erro-m" id="dvErro" hidden></div>
+    <div class="rodape" style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn p" id="dvBtn" onclick="finalizarDev('${cpf}')">Finalizar conferência</button></div>`
+    : `<div class="vazio">Este funcionário não tem peças pendentes de devolução.</div>`}`;
+}
+function devTudo(campo) {
+  document.querySelectorAll(".chk tbody tr").forEach(tr => { ["boa","desgaste","danificada","faltante"].forEach(k => tr.querySelector(".d-" + k).value = k === campo ? tr.dataset.pend : 0); });
+  calcDev();
+}
+function calcDev() {
+  let tf = 0, td = 0, ok = true;
+  document.querySelectorAll(".chk tbody tr").forEach(tr => {
+    const v = k => int(tr.querySelector(".d-" + k).value), soma = v("boa") + v("desgaste") + v("danificada") + v("faltante");
+    const err = soma > int(tr.dataset.pend) || ["boa","desgaste","danificada","faltante"].some(k => v(k) < 0);
+    tr.classList.toggle("err", err); if (err) ok = false;
+    const vf = v("faltante") * Number(tr.dataset.v), dano = tr.querySelector(".d-dano");
+    dano.hidden = v("danificada") <= 0;
+    const vd = v("danificada") > 0 ? Math.max(0, Number(tr.querySelector(".d-vd").value) || 0) : 0;
+    tr.querySelector(".d-val").textContent = brl(vf + vd); tf += vf; td += vd;
+  });
+  $("dvF").textContent = brl(tf); $("dvD").textContent = brl(td); $("dvT").textContent = brl(tf + td);
+  $("dvErro").hidden = ok; if (!ok) $("dvErro").textContent = "A soma conferida não pode passar da quantidade pendente da linha marcada.";
+  return ok;
+}
+async function finalizarDev(cpf) {
+  if (!calcDev()) return;
+  const itens = [...document.querySelectorAll(".chk tbody tr")].map(tr => ({ entregaId: tr.dataset.id, boa: int(tr.querySelector(".d-boa").value), desgaste: int(tr.querySelector(".d-desgaste").value),
+    danificada: int(tr.querySelector(".d-danificada").value), faltante: int(tr.querySelector(".d-faltante").value), valorDano: tr.querySelector(".d-vd").value,
+    motivoDano: tr.querySelector(".d-md").value.trim(), obs: tr.querySelector(".d-obs").value.trim() })).filter(i => i.boa + i.desgaste + i.danificada + i.faltante > 0);
+  const err = m => { $("dvErro").textContent = m; $("dvErro").hidden = false; };
+  if (!itens.length) return err("Informe a conferência de ao menos uma peça.");
+  const semMotivo = itens.find(i => Number(i.valorDano) > 0 && !i.motivoDano); if (semMotivo) return err("Descreva o dano das peças com prejuízo estimado.");
+  const f = $("dvFoto").files[0], foto = f ? await comprimir(f) : "";
+  $("dvBtn").disabled = true;
+  const r = await executar("devolver", { cpf, itens, foto }, "Devolução registrada e estoque atualizado.");
+  if (!r.sucesso) { $("dvBtn") && ($("dvBtn").disabled = false); return err(r.erro); }
+  modal(`<h3>Devolução registrada</h3><p class="sub">${esc(r.lote)}${r.ocorrencia ? ` · valor de referência ${brl(r.ocorrencia.valorTotal)} em análise` : " · sem pendências financeiras"}</p>
+    <div class="tabela"><table><thead><tr><th>Peça</th><th>Condição</th><th class="n">Boas</th><th class="n">Desg.</th><th class="n">Danif.</th><th class="n">Falt.</th></tr></thead><tbody>${
+      r.itens.map(i => `<tr><td>${esc(i.peca)} ${esc(i.tamanho)}</td><td>${esc(i.condicao)}</td><td class="n">${i.qtdBoa}</td><td class="n">${i.qtdDesgaste}</td><td class="n">${i.qtdDanificada}</td><td class="n">${i.qtdFaltante}</td></tr>`).join("")}</tbody></table></div>
+    <div class="rodape"><button class="btn" onclick="fecharModal();ir('devolucoes')">Fechar</button><button class="btn p" id="bComp">Baixar comprovante</button></div>`);
+  $("bComp").onclick = () => pdfDevolucao(r);
+}
+function comprimir(file) {
+  return new Promise(res => { const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { const k = Math.min(1, 1280 / Math.max(img.width, img.height)), c = document.createElement("canvas"); c.width = img.width * k; c.height = img.height * k;
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg", .75)); };
+    img.onerror = () => res(""); img.src = url; });
 }
 
-/* ── Ranking toggle ── */
-function toggleRanking() {
-    const listaEl = document.getElementById("rankingLista");
-    const btn     = document.getElementById("btnRanking");
-    rankingAberto = !rankingAberto;
-    if (rankingAberto) {
-        atualizarRanking();
-        listaEl.classList.add("aberta");
-        btn.innerHTML = "&#x1F3C6; Fechar Ranking";
-    } else {
-        listaEl.classList.remove("aberta");
-        btn.innerHTML = "&#x1F3C6; Ver Ranking de Solicitações";
-    }
+/* ───────── VALORES PARA ANÁLISE ───────── */
+function vValores() {
+  const f = filtros, lista = D.ocorrencias.filter(o => (!f.status ? !/Resolvido|Cancelado/.test(o.status) || f.todas : o.status === f.status)
+    && (!f.q || norm(o.nome).includes(norm(f.q)) || dig(o.cpf).includes(dig(f.q) || "@"))).sort((a,b) => String(b.dataHora).localeCompare(String(a.dataHora)));
+  const total = lista.reduce((s,o) => s + Number(o.valorTotal||0), 0);
+  $("conteudo").innerHTML = `<h2 class="tit">Valores para análise</h2><p class="sub">${lista.length} ocorrência(s) · ${brl(total)}. Nada aqui é desconto automático: cada valor passa por revisão, aprovação e pode ser contestado.</p>
+    <div class="barra"><label>Funcionário<input value="${esc(f.q||"")}" oninput="filtrar('q',this.value)"></label>
+      <label>Status<select onchange="filtrar('status',this.value,1)"><option value="">Em aberto</option>${FIN.map(s => `<option ${f.status===s?"selected":""}>${s}</option>`).join("")}</select></label></div>
+    <div class="cards">${lista.map(o => `<article class="card"><header><div><b>${brl(o.valorTotal)}</b><div>${esc(o.nome)} · ${esc(o.cpf)}</div></div><span class="selo ${classeSt(o.status)}">${esc(o.status)}</span></header>
+      <div class="meta">${fData(o.dataHora)} · conferência ${esc(o.lote)}</div><div>${esc(o.resumo)}</div>
+      <div class="meta">Faltantes ${brl(o.valorFaltante)} · danos estimados ${brl(o.valorDano)}<br>Calculado por ${esc(o.calculadoPor)}${o.revisadoPor ? " · revisado por " + esc(o.revisadoPor) : ""}${o.aprovadoPor ? " · decisão de " + esc(o.aprovadoPor) : ""}</div>
+      ${o.contestacao.length ? `<div class="aviso-m">${o.contestacao.map(c => `${fData(c.em)} · ${esc(c.por)}: ${esc(c.texto)}`).join("<br>")}</div>` : ""}
+      <details class="hist"><summary>Histórico (${o.historico.length})</summary><ol>${o.historico.map(h => `<li>${fData(h.em)} · ${esc(h.status)} · ${esc(h.por)}${h.texto ? " · " + esc(h.texto) : ""}</li>`).join("")}</ol></details>
+      <div class="acoes">${/Resolvido|Cancelado/.test(o.status) ? '<span class="meta">Encerrada</span>' : acoesOc(o)}</div></article>`).join("") || `<div class="vazio">Nenhuma ocorrência com estes filtros.</div>`}</div>`;
+}
+function acoesOc(o) {
+  const b = (st, txt, cls = "") => `<button class="btn peq ${cls}" onclick="modalOc('${o.id}','${st}')">${txt}</button>`, a = [];
+  if (["Em análise", "Contestação registrada"].includes(o.status)) a.push(b("Aguardando aprovação", "Enviar para aprovação", "p"), b(o.status, "Revisar valor do dano"));
+  if (o.status !== "Contestação registrada") a.push(b("Contestação registrada", "Registrar contestação"));
+  if (EU.perfil === "admin") {
+    if (o.status === "Aguardando aprovação") a.push(b("Aprovado administrativamente", "Aprovar", "p"));
+    if (o.status === "Aprovado administrativamente") a.push(b("Resolvido", "Marcar como resolvido", "p"));
+    a.push(b("Cancelado após revisão", "Cancelar após revisão", "perigo"));
+  }
+  return a.join("");
+}
+function modalOc(id, status) {
+  const o = D.ocorrencias.find(x => x.id === id), revisar = status === o.status;
+  modal(`<h3>${revisar ? "Revisar valor do dano" : status}</h3><p class="sub">${esc(o.nome)} · ${brl(o.valorTotal)}</p>
+    ${revisar ? `<label class="c">Novo valor estimado de dano (R$)<input type="number" id="oVal" min="0" step="0.01" value="${Number(o.valorDano||0)}"></label>` : ""}
+    <label class="c" style="margin-top:12px">Justificativa${status === "Aguardando aprovação" && !revisar ? " (opcional)" : ""}<textarea id="oJust" maxlength="1000"></textarea></label>
+    ${status === "Aprovado administrativamente" ? `<div class="aviso-m">Aprovar registra a decisão administrativa. Qualquer desconto em folha depende da política da empresa, de autorização do funcionário quando exigida e das regras trabalhistas aplicáveis.</div>` : ""}
+    <div class="erro-m" id="mErro" hidden></div>
+    <div class="rodape"><button class="btn" onclick="fecharModal()">Voltar</button><button class="btn p" id="mBtn" onclick="confirmarOc('${id}','${status}',${revisar})">Salvar</button></div>`);
+}
+async function confirmarOc(id, status, revisar) {
+  const d = { id, status, justificativa: $("oJust").value.trim() }; if (revisar) d.valorDano = $("oVal").value;
+  $("mBtn").disabled = true;
+  const r = await executar("ocorrencia", d, "Ocorrência atualizada."); if (r.sucesso) fecharModal(); else { erroModal(r.erro); $("mBtn").disabled = false; }
 }
 
-function atualizarRanking() {
-    const r = {};
-    dadosGlobais.forEach(i => { if (i.nome) r[i.nome] = (r[i.nome]||0)+1; });
-    const top = Object.entries(r).sort((a,b) => b[1]-a[1]).slice(0,10);
-    document.getElementById("rankingLista").innerHTML =
-        top.map((x,i) => `<div class="rankingItem">${i+1}. <b>${x[0]}</b><br>${x[1]} solicitações</div>`).join("")
-        || "<p style='color:#888'>Nenhum dado.</p>";
+/* ───────── FUNCIONÁRIOS ───────── */
+function vFuncionarios() {
+  const f = filtros, todos = funcionarios();
+  if (f.cpf && todos[f.cpf]) return vFicha(todos[f.cpf], f.cpf);
+  const lista = Object.entries(todos).filter(([c, x]) => !f.q || norm(x.nome).includes(norm(f.q)) || c.includes(dig(f.q) || "@")).sort((a,b) => a[1].nome.localeCompare(b[1].nome));
+  $("conteudo").innerHTML = `<h2 class="tit">Funcionários</h2><p class="sub">Ficha de controle com tudo o que cada funcionário recebeu, devolveu e ainda tem pendente.</p>
+    <div class="barra"><label>Buscar<input value="${esc(f.q||"")}" placeholder="Nome ou CPF" oninput="filtrar('q',this.value)"></label></div>
+    <div class="tabela"><table><thead><tr><th>Nome</th><th>CPF</th><th>Cidade / posto</th><th class="n">Pedidos</th><th class="n">Peças com ele</th><th></th></tr></thead><tbody>${
+      lista.slice(0, limite * 2).map(([c, x]) => { const pend = D.entregas.filter(e => dig(e.cpf) === c).reduce((s,e) => s + pendEnt(e), 0);
+        return `<tr><td>${esc(x.nome)}</td><td>${esc(x.cpf)}</td><td>${esc(x.ult.cidade)} · ${esc(x.ult.posto)}</td><td class="n">${x.pedidos.length}</td><td class="n">${pend}</td><td class="n"><button class="btn peq" onclick="ir('funcionarios',{cpf:'${c}'})">Abrir ficha</button></td></tr>`; }).join("")}</tbody></table></div>`;
+}
+function fichaDados(c) {
+  const ents = D.entregas.filter(e => dig(e.cpf) === c), devs = D.devolucoes.filter(d => dig(d.cpf) === c), ocs = D.ocorrencias.filter(o => dig(o.cpf) === c);
+  const r = { ents, devs, ocs, com: 0, vCom: 0, dev: 0, falt: 0, vFalt: 0, dan: 0 };
+  ents.forEach(e => { r.com += pendEnt(e); r.vCom += pendEnt(e) * Number(e.valorUnit||0); });
+  devs.forEach(d => { r.dev += int(d.qtdBoa) + int(d.qtdDesgaste); r.falt += int(d.qtdFaltante); r.vFalt += Number(d.valorFaltante||0) + Number(d.valorDanoEstimado||0); r.dan += int(d.qtdDanificada); });
+  const aberta = ocs.find(o => !/Resolvido|Cancelado/.test(o.status));
+  const devPend = D.pedidos.some(p => dig(p.cpf) === c && [ST.DEVPEND, ST.DEVPARC].includes(p.status)) && r.com > 0;
+  r.situacao = aberta ? aberta.status : devPend ? "Aguardando conferência" : "Sem pendências";
+  return r;
+}
+function vFicha(x, c) {
+  const r = fichaDados(c), u = x.ult;
+  $("conteudo").innerHTML = `<button class="btn peq" onclick="ir('funcionarios')">Voltar à lista</button>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-top:12px">
+      <div><h2 class="tit">${esc(x.nome)}</h2><p class="sub">CPF ${esc(x.cpf)} · ${esc(u.telefone)} · ${esc(u.cidade)} · ${esc(u.posto)}${u.funcao ? " · " + esc(u.funcao) : ""}</p></div>
+      <div style="display:flex;gap:8px;align-items:center"><span class="selo ${classeSt(r.situacao)}">${esc(r.situacao)}</span><button class="btn" onclick="pdfFicha('${c}')">Exportar ficha</button>${r.com ? `<button class="btn p" onclick="ir('devolucoes',{cpf:'${c}'})">Conferir devolução</button>` : ""}</div></div>
+    <div class="fichares">
+      <div class="kpi destaque"><span>Com o funcionário</span><b>${r.com}</b><small>${brl(r.vCom)}</small></div>
+      <div class="kpi"><span>Já devolvidas</span><b>${r.dev}</b><small>${r.dan} danificada(s) em quarentena</small></div>
+      <div class="kpi ${r.falt ? "alerta" : ""}"><span>Não devolvidas</span><b>${r.falt}</b><small>${brl(r.vFalt)} de referência para análise</small></div>
+    </div>
+    <h3 class="sec">Peças recebidas</h3>${r.ents.length ? `<div class="tabela"><table><thead><tr><th>Data</th><th>Protocolo</th><th>Peça</th><th class="n">Entregue</th><th class="n">Pendente</th><th class="n">Valor unit.</th><th>Estado</th><th>Responsável</th></tr></thead><tbody>${
+      r.ents.map(e => `<tr><td>${fData(e.dataHora)}</td><td>${esc(e.protocolo)}</td><td>${esc(e.peca)} ${esc(e.tamanho)}</td><td class="n">${int(e.qtdEntregue)}</td><td class="n">${pendEnt(e)}</td><td class="n">${brl(e.valorUnit)}</td><td>${esc(e.estadoEntrega)}</td><td>${esc(e.responsavel)}</td></tr>`).join("")}</tbody></table></div>` : `<div class="vazio">Nenhuma entrega registrada no sistema novo.</div>`}
+    <h3 class="sec">Devoluções</h3>${r.devs.length ? `<div class="tabela"><table><thead><tr><th>Data</th><th>Peça</th><th>Condição</th><th class="n">Boas</th><th class="n">Desg.</th><th class="n">Danif.</th><th class="n">Falt.</th><th class="n">Valor ref.</th><th>Responsável</th><th></th></tr></thead><tbody>${
+      r.devs.map(d => `<tr><td>${fData(d.dataHora)}</td><td>${esc(d.peca)} ${esc(d.tamanho)}</td><td>${esc(d.condicao)}</td><td class="n">${d.qtdBoa}</td><td class="n">${d.qtdDesgaste}</td><td class="n">${d.qtdDanificada}</td><td class="n">${d.qtdFaltante}</td>
+        <td class="n">${brl(Number(d.valorFaltante||0) + Number(d.valorDanoEstimado||0))}</td><td>${esc(d.responsavel)}</td><td>${d.foto ? `<a href="${esc(d.foto)}" target="_blank" rel="noopener">foto</a>` : ""}</td></tr>`).join("")}</tbody></table></div>` : `<div class="vazio">Nenhuma devolução conferida.</div>`}
+    <h3 class="sec">Valores para análise</h3>${r.ocs.length ? `<div class="tabela"><table><thead><tr><th>Data</th><th>Resumo</th><th class="n">Valor</th><th>Status</th></tr></thead><tbody>${
+      r.ocs.map(o => `<tr><td>${fData(o.dataHora)}</td><td>${esc(o.resumo)}</td><td class="n">${brl(o.valorTotal)}</td><td><span class="selo ${classeSt(o.status)}">${esc(o.status)}</span></td></tr>`).join("")}</tbody></table></div>` : `<div class="vazio">Sem pendências financeiras.</div>`}
+    <h3 class="sec">Pedidos</h3><div class="cards">${x.pedidos.slice().sort((a,b) => String(b.data).localeCompare(String(a.data))).map(cardPedido).join("")}</div>`;
 }
 
-/* ── Normaliza a assinatura (redesenha em canvas) para o jsPDF sempre conseguir ler,
-   independente do formato/variante do PNG original ── */
-function normalizarAssinatura(dataUrl) {
-    return new Promise((resolve) => {
-        try {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement("canvas");
-                canvas.width = img.naturalWidth || 300;
-                canvas.height = img.naturalHeight || 120;
-                const ctx = canvas.getContext("2d");
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0);
-                resolve(canvas.toDataURL("image/jpeg", 0.92));
-            };
-            img.onerror = () => resolve(null);
-            img.src = dataUrl;
-        } catch (e) {
-            resolve(null);
-        }
-    });
+/* ───────── RELATÓRIOS ───────── */
+const RELATORIOS = {
+  estoque: { nome: "Posição atual do estoque", periodo: false, gerar: f => ({ cols: ["Peça","Tam.","Categoria","Saldo","Reservado","Disponível","Mínimo","Quarentena","Valor unit.","Valor total"],
+    linhas: D.pecas.filter(p => p.ativo === "SIM" && filtroPeca(p, f)).sort((a,b) => a.nome.localeCompare(b.nome)).map(p => [p.nome, p.tamanho, p.categoria, int(p.saldo), int(p.reservado), disp(p), minimo(p), int(p.quarentena), brl(p.valorUnit), brl(int(p.saldo)*Number(p.valorUnit||0))]),
+    total: "Valor total: " + brl(D.pecas.filter(p => p.ativo === "SIM" && filtroPeca(p, f)).reduce((s,p) => s + int(p.saldo)*Number(p.valorUnit||0), 0)) }) },
+  baixo: { nome: "Estoque baixo", periodo: false, gerar: f => ({ cols: ["Peça","Tam.","Disponível","Mínimo","Saldo","Reservado","Situação"],
+    linhas: D.pecas.filter(p => p.ativo === "SIM" && disp(p) <= minimo(p) && filtroPeca(p, f)).sort((a,b) => disp(a) - disp(b)).map(p => [p.nome, p.tamanho, disp(p), minimo(p), int(p.saldo), int(p.reservado), disp(p) <= 0 ? "Sem estoque" : "Estoque baixo"]) }) },
+  movs: { nome: "Histórico de entradas e saídas", periodo: true, gerar: f => ({ cols: ["Data","Peça","Tipo","Qtd","Saldo antes","Saldo depois","Responsável","Motivo","Ref."],
+    linhas: D.movimentacoes.filter(m => noPeriodo(m.dataHora, f) && !/^ALERTA/.test(m.tipo) && filtroPeca({ nome: m.nome, tamanho: m.tamanho }, f)).map(m => [fData(m.dataHora), m.nome + " " + m.tamanho, TIPOS_MOV[m.tipo] || m.tipo, m.qtd, m.saldoAntes, m.saldoDepois, m.responsavel, m.motivo, m.referencia]) }) },
+  porFuncionario: { nome: "Uniformes por funcionário", periodo: false, gerar: f => { const m = {};
+    D.entregas.filter(e => pendEnt(e) > 0 && filtroLocal(e, f) && filtroPeca({ nome: e.peca, tamanho: e.tamanho }, f)).forEach(e => { const k = dig(e.cpf) + e.peca + e.tamanho; const x = m[k] = m[k] || [e.nome, e.cpf, e.posto, e.peca, e.tamanho, 0, 0]; x[5] += pendEnt(e); x[6] += pendEnt(e) * Number(e.valorUnit||0); });
+    const l = Object.values(m).sort((a,b) => a[0].localeCompare(b[0])); return { cols: ["Funcionário","CPF","Posto","Peça","Tam.","Qtd com ele","Valor"], linhas: l.map(x => [...x.slice(0,6), brl(x[6])]), total: "Valor com os funcionários: " + brl(l.reduce((s,x) => s + x[6], 0)) }; } },
+  entregas: { nome: "Entregas por período", periodo: true, gerar: f => { const l = D.entregas.filter(e => noPeriodo(e.dataHora, f) && filtroLocal(e, f) && filtroPeca({ nome: e.peca, tamanho: e.tamanho }, f));
+    return { cols: ["Data","Protocolo","Funcionário","Posto","Peça","Tam.","Qtd","Valor unit.","Responsável"], linhas: l.map(e => [fData(e.dataHora), e.protocolo, e.nome, e.posto, e.peca, e.tamanho, int(e.qtdEntregue), brl(e.valorUnit), e.responsavel]),
+      total: `${l.reduce((s,e) => s + int(e.qtdEntregue), 0)} peças · ${brl(l.reduce((s,e) => s + int(e.qtdEntregue)*Number(e.valorUnit||0), 0))}` }; } },
+  devPendentes: { nome: "Devoluções pendentes", periodo: false, gerar: f => { const pr = new Set(D.pedidos.filter(p => [ST.DEVPEND, ST.DEVPARC].includes(p.status)).map(p => p.protocolo));
+    const l = D.entregas.filter(e => pr.has(e.protocolo) && pendEnt(e) > 0 && filtroLocal(e, f));
+    return { cols: ["Funcionário","CPF","Posto","Protocolo","Peça","Tam.","Pendente","Valor"], linhas: l.map(e => [e.nome, e.cpf, e.posto, e.protocolo, e.peca, e.tamanho, pendEnt(e), brl(pendEnt(e)*Number(e.valorUnit||0))]),
+      total: "Valor pendente: " + brl(l.reduce((s,e) => s + pendEnt(e)*Number(e.valorUnit||0), 0)) }; } },
+  faltantes: { nome: "Peças faltantes e danificadas", periodo: true, gerar: f => { const l = D.devolucoes.filter(d => (int(d.qtdFaltante) || int(d.qtdDanificada)) && noPeriodo(d.dataHora, f));
+    return { cols: ["Data","Funcionário","CPF","Peça","Tam.","Faltantes","Danificadas","Valor faltante","Dano estimado","Motivo do dano","Responsável"],
+      linhas: l.map(d => [fData(d.dataHora), d.nome, d.cpf, d.peca, d.tamanho, int(d.qtdFaltante), int(d.qtdDanificada), brl(d.valorFaltante), brl(d.valorDanoEstimado), d.motivoDano, d.responsavel]),
+      total: "Total de referência: " + brl(l.reduce((s,d) => s + Number(d.valorFaltante||0) + Number(d.valorDanoEstimado||0), 0)) }; } },
+  valores: { nome: "Valores de referência para análise", periodo: true, gerar: f => { const l = D.ocorrencias.filter(o => noPeriodo(o.dataHora, f));
+    return { cols: ["Data","Funcionário","CPF","Resumo","Faltantes","Danos","Total","Status","Calculado por","Decisão"],
+      linhas: l.map(o => [fData(o.dataHora), o.nome, o.cpf, o.resumo, brl(o.valorFaltante), brl(o.valorDano), brl(o.valorTotal), o.status, o.calculadoPor, o.aprovadoPor]),
+      total: "Total: " + brl(l.reduce((s,o) => s + Number(o.valorTotal||0), 0)) }; } },
+  responsaveis: { nome: "Movimentações por responsável", periodo: true, gerar: f => { const m = {};
+    D.movimentacoes.filter(x => noPeriodo(x.dataHora, f) && x.responsavel !== "Sistema").forEach(x => { const r = m[x.responsavel] = m[x.responsavel] || { n: 0, ent: 0, sai: 0, aj: 0, dev: 0 };
+      r.n++; if (/^ENTRADA_COMPRA|ENTRADA_INICIAL/.test(x.tipo)) r.ent += int(x.qtd); if (x.tipo === "SAIDA_ENTREGA") r.sai += int(x.qtd); if (x.tipo === "AJUSTE_MANUAL") r.aj++; if (x.tipo === "ENTRADA_DEVOLUCAO" || x.tipo === "QUARENTENA_DEVOLUCAO") r.dev += int(x.qtd); });
+    return { cols: ["Responsável","Movimentações","Peças recebidas (compra)","Peças entregues","Peças conferidas na devolução","Ajustes manuais"], linhas: Object.entries(m).map(([k,v]) => [k, v.n, v.ent, v.sai, v.dev, v.aj]) }; } }
+};
+function noPeriodo(iso, f) { const d = diaISO(iso); return (!f.de || d >= f.de) && (!f.ate || d <= f.ate); }
+function filtroPeca(p, f) { return (!f.peca || norm(p.nome).includes(norm(f.peca))) && (!f.tam || norm(p.tamanho) === norm(f.tam)); }
+function filtroLocal(e, f) { return (!f.cidade || e.cidade === f.cidade) && (!f.posto || norm(e.posto).includes(norm(f.posto))); }
+function descFiltros(f) { const a = []; if (f.de || f.ate) a.push(`Período: ${f.de ? fDia(f.de + "T12:00") : "início"} a ${f.ate ? fDia(f.ate + "T12:00") : "hoje"}`);
+  if (f.peca) a.push("Peça: " + f.peca); if (f.tam) a.push("Tamanho: " + f.tam); if (f.cidade) a.push("Cidade: " + f.cidade); if (f.posto) a.push("Posto: " + f.posto); return a.join(" · ") || "Sem filtros"; }
+function vRelatorios() {
+  const f = filtros, tipo = f.tipo || "estoque", R = RELATORIOS[tipo], res = R.gerar(f);
+  const cidades = [...new Set(D.entregas.map(e => e.cidade).filter(Boolean))].sort();
+  $("conteudo").innerHTML = `<h2 class="tit">Relatórios</h2><p class="sub">Escolha o relatório, aplique filtros e exporte em PDF ou CSV (abre no Excel).</p>
+    <div class="barra">
+      <label style="min-width:240px">Relatório<select onchange="filtros={tipo:this.value};render()">${Object.entries(RELATORIOS).map(([k,v]) => `<option value="${k}" ${k===tipo?"selected":""}>${v.nome}</option>`).join("")}</select></label>
+      ${R.periodo ? `<label style="max-width:150px">De<input type="date" value="${f.de||""}" onchange="filtrar('de',this.value,1)"></label><label style="max-width:150px">Até<input type="date" value="${f.ate||""}" onchange="filtrar('ate',this.value,1)"></label>` : ""}
+      <label>Peça<input value="${esc(f.peca||"")}" oninput="filtrar('peca',this.value)"></label>
+      <label style="max-width:110px">Tamanho<input value="${esc(f.tam||"")}" oninput="filtrar('tam',this.value)"></label>
+      <label>Cidade<select onchange="filtrar('cidade',this.value,1)"><option value="">Todas</option>${cidades.map(c => `<option ${f.cidade===c?"selected":""}>${esc(c)}</option>`).join("")}</select></label>
+      <label>Posto<input value="${esc(f.posto||"")}" oninput="filtrar('posto',this.value)"></label>
+      <div class="acoes"><button class="btn p" onclick="exportarRel('pdf')">Exportar PDF</button><button class="btn" onclick="exportarRel('csv')">Exportar CSV</button></div>
+    </div>
+    <p class="sub">${res.linhas.length} linha(s)${res.total ? " · " + esc(res.total) : ""} · ${esc(descFiltros(f))}</p>
+    ${res.linhas.length ? `<div class="tabela"><table><thead><tr>${res.cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${res.linhas.slice(0, 300).map(l => `<tr>${l.map(v => `<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+      ${res.linhas.length > 300 ? `<p class="sub" style="margin-top:8px">Mostrando 300 linhas na tela. A exportação inclui todas.</p>` : ""}` : `<div class="vazio">Nenhum dado para estes filtros.</div>`}`;
+}
+async function exportarRel(fmt) {
+  const f = filtros, R = RELATORIOS[f.tipo || "estoque"], res = R.gerar(f), nome = "vegas_" + norm(R.nome).replace(/[^a-z0-9]+/g, "_") + "_" + diaISO(new Date());
+  if (fmt === "csv") {
+    const csv = [res.cols, ...res.linhas].map(l => l.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(";")).join("\r\n");
+    baixar(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }), nome + ".csv"); return;
+  }
+  const pdf = new window.jspdf.jsPDF({ orientation: res.cols.length > 7 ? "landscape" : "portrait" });
+  const y = await cabecalhoPdf(pdf, R.nome, descFiltros(f));
+  pdf.autoTable({ startY: y, head: [res.cols], body: res.linhas, theme: "grid", styles: { fontSize: 8, cellPadding: 1.6 }, headStyles: { fillColor: [30,32,36], textColor: 235 } });
+  if (res.total) { pdf.setFontSize(10); pdf.setFont("helvetica","bold"); pdf.text(res.total, 14, pdf.lastAutoTable.finalY + 8); }
+  rodapePdf(pdf); pdf.save(nome + ".pdf");
+}
+function baixar(blob, nome) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nome; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+
+/* ───────── PDF ───────── */
+let logoData = null;
+async function logo() {
+  if (logoData !== null) return logoData;
+  try { const b = await (await fetch("assets/vegaslogo.jpg")).blob(); logoData = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); }); }
+  catch (e) { logoData = ""; }
+  return logoData;
+}
+async function cabecalhoPdf(pdf, titulo, filtrosTxt) {
+  const W = pdf.internal.pageSize.getWidth();
+  pdf.setFillColor(0,0,0); pdf.rect(0,0,W,32,"F");
+  const l = await logo(); if (l) try { pdf.addImage(l, "JPEG", 10, 4, 24, 24); } catch (e) {}
+  pdf.setTextColor(232,234,236); pdf.setFont("helvetica","bold"); pdf.setFontSize(18); pdf.text("VEGAS", 38, 15);
+  pdf.setFont("helvetica","normal"); pdf.setFontSize(8); pdf.text("VIGILÂNCIA E SEGURANÇA", 38, 20);
+  pdf.setFont("helvetica","bold"); pdf.setFontSize(12); pdf.text(titulo, W - 12, 14, { align: "right" });
+  pdf.setFont("helvetica","normal"); pdf.setFontSize(8);
+  pdf.text(`Emitido em ${new Date().toLocaleString("pt-BR")} por ${EU.nome}`, W - 12, 20, { align: "right" });
+  if (filtrosTxt) pdf.text(filtrosTxt, W - 12, 25, { align: "right" });
+  pdf.setTextColor(20,20,20);
+  return 40;
+}
+function rodapePdf(pdf) {
+  const n = pdf.getNumberOfPages(), W = pdf.internal.pageSize.getWidth(), H = pdf.internal.pageSize.getHeight();
+  for (let i = 1; i <= n; i++) { pdf.setPage(i); pdf.setFontSize(7.5); pdf.setTextColor(130); pdf.text(`Vegas Vigilância e Segurança · página ${i} de ${n}`, W / 2, H - 6, { align: "center" }); }
+}
+function linhasDados(pdf, y, pares) { pdf.setFontSize(10); pares.forEach(([k,v]) => { pdf.setTextColor(110); pdf.text(k, 14, y); pdf.setTextColor(20); pdf.text(String(v ?? ""), 58, y); y += 6; }); return y + 2; }
+async function pdfEntrega(p, r) {
+  const pdf = new window.jspdf.jsPDF(); let y = await cabecalhoPdf(pdf, "Comprovante de entrega");
+  y = linhasDados(pdf, y, [["Protocolo", p.protocolo], ["Entrega", r.lote], ["Funcionário", p.nome], ["CPF", p.cpf], ["Cidade / posto", `${p.cidade} / ${p.posto}`], ["Responsável", EU.nome], ["Data e hora", new Date().toLocaleString("pt-BR")], ["Situação do pedido", r.status]]);
+  const tot = r.itens.reduce((s,i) => s + i.qtdEntregue * i.valorUnit, 0);
+  pdf.autoTable({ startY: y, head: [["Peça","Tam.","Qtd","Estado","Valor unit. (ref.)","Total (ref.)"]], body: r.itens.map(i => [i.peca, i.tamanho, i.qtdEntregue, i.estadoEntrega, brl(i.valorUnit), brl(i.qtdEntregue * i.valorUnit)]),
+    foot: [["", "", "", "", "Total", brl(tot)]], theme: "grid", styles: { fontSize: 9 }, headStyles: { fillColor: [30,32,36] }, footStyles: { fillColor: [235,236,238], textColor: 20 } });
+  y = pdf.lastAutoTable.finalY + 26;
+  pdf.setFontSize(9); pdf.line(14, y, 94, y); pdf.line(116, y, 196, y); pdf.text("Assinatura do funcionário", 14, y + 5); pdf.text("Responsável pelo estoque", 116, y + 5);
+  pdf.setFontSize(8); pdf.setTextColor(110); pdf.text(pdf.splitTextToSize("Declaro ter recebido as peças acima em perfeito estado. Os valores são de referência para controle patrimonial.", 182), 14, y + 14);
+  rodapePdf(pdf); pdf.save(`entrega_${p.protocolo}_${r.lote}.pdf`);
+}
+async function pdfDevolucao(r) {
+  const pdf = new window.jspdf.jsPDF({ orientation: "landscape" }); const i0 = r.itens[0] || {}; let y = await cabecalhoPdf(pdf, "Comprovante de devolução");
+  y = linhasDados(pdf, y, [["Conferência", r.lote], ["Funcionário", i0.nome], ["CPF", i0.cpf], ["Responsável", EU.nome], ["Data e hora", new Date().toLocaleString("pt-BR")]]);
+  pdf.autoTable({ startY: y, head: [["Peça","Tam.","Protocolo","Pendente","Boas","Desgaste","Danificadas","Não devolvidas","Valor unit. (entrega)","Faltante (ref.)","Dano estimado","Condição"]],
+    body: r.itens.map(i => [i.peca, i.tamanho, i.protocolo, i.pendenteAntes, i.qtdBoa, i.qtdDesgaste, i.qtdDanificada, i.qtdFaltante, brl(i.valorUnitEntrega), brl(i.valorFaltante), brl(i.valorDanoEstimado), i.condicao]),
+    theme: "grid", styles: { fontSize: 8 }, headStyles: { fillColor: [30,32,36] } });
+  y = pdf.lastAutoTable.finalY + 8; pdf.setFontSize(10); pdf.setFont("helvetica","bold");
+  pdf.text(`Valor de referência para análise: ${brl(r.ocorrencia ? r.ocorrencia.valorTotal : 0)}`, 14, y);
+  pdf.setFont("helvetica","normal"); pdf.setFontSize(8); pdf.setTextColor(110);
+  pdf.text(pdf.splitTextToSize("Valor de referência para análise. Não constitui dívida nem autorização de desconto. Depende de apuração, aprovação administrativa e das regras trabalhistas aplicáveis; o funcionário pode registrar contestação.", 260), 14, y + 6);
+  y += 30; pdf.setTextColor(20); pdf.line(14, y, 100, y); pdf.line(150, y, 236, y); pdf.text("Assinatura do funcionário", 14, y + 5); pdf.text("Responsável pela conferência", 150, y + 5);
+  rodapePdf(pdf); pdf.save(`devolucao_${r.lote}.pdf`);
+}
+async function pdfFicha(c) {
+  const x = funcionarios()[c], r = fichaDados(c), u = x.ult, pdf = new window.jspdf.jsPDF(); let y = await cabecalhoPdf(pdf, "Ficha de uniformes");
+  y = linhasDados(pdf, y, [["Funcionário", x.nome], ["CPF", x.cpf], ["Telefone", u.telefone], ["Cidade / posto", `${u.cidade} / ${u.posto}`], ["Função", u.funcao], ["Situação", r.situacao],
+    ["Com o funcionário", `${r.com} peça(s) · ${brl(r.vCom)}`], ["Não devolvidas", `${r.falt} peça(s) · ${brl(r.vFalt)} (referência)`]]);
+  const tab = (titulo, head, body) => { if (!body.length) return; pdf.setFontSize(11); pdf.setFont("helvetica","bold"); pdf.text(titulo, 14, y); pdf.setFont("helvetica","normal");
+    pdf.autoTable({ startY: y + 3, head: [head], body, theme: "grid", styles: { fontSize: 8 }, headStyles: { fillColor: [30,32,36] } }); y = pdf.lastAutoTable.finalY + 10; };
+  tab("Peças recebidas", ["Data","Protocolo","Peça","Entregue","Pendente","Valor unit.","Responsável"], r.ents.map(e => [fData(e.dataHora), e.protocolo, e.peca + " " + e.tamanho, int(e.qtdEntregue), pendEnt(e), brl(e.valorUnit), e.responsavel]));
+  tab("Devoluções", ["Data","Peça","Condição","Boas","Desg.","Danif.","Falt.","Valor ref."], r.devs.map(d => [fData(d.dataHora), d.peca + " " + d.tamanho, d.condicao, d.qtdBoa, d.qtdDesgaste, d.qtdDanificada, d.qtdFaltante, brl(Number(d.valorFaltante||0) + Number(d.valorDanoEstimado||0))]));
+  tab("Valores para análise", ["Data","Resumo","Valor","Status"], r.ocs.map(o => [fData(o.dataHora), o.resumo, brl(o.valorTotal), o.status]));
+  rodapePdf(pdf); pdf.save(`ficha_${dig(x.cpf)}.pdf`);
 }
 
-/* ── PDF Definitivo — Sem Cidade / Sem Fotos / Com Data, Nome, Posto e Itens ── */
-async function exportarPDF(statusFiltro) {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(16);
-    
-    const tituloTipo = tipoAtual === "uniformes" ? "UNIFORMES" : "MATERIAIS";
-    pdf.text(`RELATÓRIO DE ${tituloTipo} - STATUS: ${statusFiltro}`, 14, 20);
-    
-    // Data atual automatizada
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(10);
-    const dataAtual = new Date().toLocaleDateString('pt-BR');
-    pdf.text(`Emitido em: ${dataAtual}`, 14, 27);
-    
-    pdf.setDrawColor(200, 200, 200);
-    pdf.line(14, 30, 196, 30);
-    
-    let y = 38;
-    const limitePagina = 275;
-    
-    const itensFiltrados = dadosGlobais.filter(i => i.status === statusFiltro);
-    
-    if (itensFiltrados.length === 0) {
-        pdf.setFontSize(12);
-        pdf.text("Nenhum registro encontrado para este status.", 14, y);
-        pdf.save(`relatorio_${tipoAtual}_${statusFiltro}.pdf`);
-        return;
-    }
-
-    for (let index = 0; index < itensFiltrados.length; index++) {
-        const item = itensFiltrados[index];
-
-        // Altura de segurança para cada bloco
-        if (y + 30 > limitePagina) {
-            pdf.addPage();
-            y = 20;
-        }
-        
-        // Nome do funcionário
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(12);
-        pdf.text(`${index + 1}. ${item.nome || "Não informado"}`, 14, y);
-        y += 6;
-        
-        // Detalhes (Data e Posto)
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(10);
-        const postoTxt = item.posto || "Não informado";
-        pdf.text(`Data: ${dataAtual}   |   Posto: ${postoTxt}`, 14, y);
-        y += 6;
-        
-        // Itens Solicitados
-        if (tipoAtual === "uniformes") {
-            pdf.setFont("helvetica", "bold");
-            pdf.text("Uniformes Solicitados:", 14, y);
-            pdf.setFont("helvetica", "normal");
-            y += 5;
-            
-            const textoUniformes = item.uniformes || "Nenhum uniforme listado";
-            const linhasUniformes = pdf.splitTextToSize(textoUniformes, 180);
-            
-            linhasUniformes.forEach(linha => {
-                if (y > limitePagina) { pdf.addPage(); y = 20; }
-                pdf.text(linha, 14, y);
-                y += 5;
-            });
-        } else {
-            const materialTxt = item.material || "Não informado";
-            const qtdTxt = item.quantidade || "0";
-            pdf.text(`Material: ${materialTxt}  (Qtd: ${qtdTxt})`, 14, y);
-            y += 5;
-        }
-        
-        // Assinatura (prova de solicitação)
-        if (item.assinatura && item.assinatura.length > 10) {
-            if (y + 34 > limitePagina) { pdf.addPage(); y = 20; }
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(10);
-            pdf.text("Assinatura:", 14, y);
-            y += 4;
-
-            const assinaturaNormalizada = await normalizarAssinatura(item.assinatura);
-            if (assinaturaNormalizada) {
-                try {
-                    pdf.addImage(assinaturaNormalizada, "JPEG", 14, y, 55, 22);
-                    y += 26;
-                } catch (e) {
-                    pdf.setFont("helvetica", "normal");
-                    pdf.text("(assinatura não pôde ser carregada)", 14, y);
-                    y += 6;
-                }
-            } else {
-                pdf.setFont("helvetica", "normal");
-                pdf.text("(assinatura não pôde ser carregada)", 14, y);
-                y += 6;
-            }
-        }
-
-        // Linha separadora discreta
-        y += 2;
-        pdf.setDrawColor(240, 240, 240);
-        pdf.line(14, y, 196, y);
-        y += 7; 
-    }
-    
-    pdf.save(`relatorio_${tipoAtual}_${statusFiltro}.pdf`);
-
-    // Após exportar o PDF de ENTREGUES, oferece apagar esses registros da planilha
-    if (statusFiltro === "ENTREGUE") {
-        const qtd = itensFiltrados.length;
-        const confirmar = confirm(`PDF gerado com ${qtd} pedido(s) entregue(s).\n\nDeseja apagar esses ${qtd} registro(s) da planilha agora?\n\nEsta ação NÃO pode ser desfeita.`);
-        if (confirmar) {
-            await apagarEntreguesDaPlanilha();
-        }
-    }
+/* ───────── MATERIAIS (fluxo antigo) ───────── */
+let MAT = null;
+async function vMateriais() {
+  if (!MAT) { $("conteudo").innerHTML = `<h2 class="tit">Materiais</h2><p class="sub">Carregando…</p>`;
+    try { const r = await api("materiais", {}, { semRender: true }); MAT = r.itens || []; } catch (e) { toast(e.message, true); return; } }
+  if (VIEW !== "materiais") return;
+  const f = filtros, ST_M = ["EM ANÁLISE","PENDENTE","SEPARADO","ENTREGUE"];
+  const lista = MAT.filter(m => (!f.status || m.status === f.status) && (!f.q || norm(m.nome + " " + m.protocolo + " " + m.material + " " + m.cidade).includes(norm(f.q)))).slice().reverse();
+  $("conteudo").innerHTML = `<h2 class="tit">Materiais</h2><p class="sub">Pedidos do formulário de materiais, no mesmo fluxo de antes.</p>
+    <div class="barra"><label>Buscar<input value="${esc(f.q||"")}" placeholder="Nome, protocolo, material ou cidade" oninput="filtrar('q',this.value)"></label>
+      <label>Status<select onchange="filtrar('status',this.value,1)"><option value="">Todos</option>${ST_M.map(s => `<option ${f.status===s?"selected":""}>${s}</option>`).join("")}</select></label>
+      <div class="acoes">${ST_M.map(s => `<button class="btn peq" onclick="pdfMateriais('${s}')">PDF ${s.toLowerCase()}</button>`).join("")}<button class="btn peq" onclick="MAT=null;render()">Recarregar</button></div></div>
+    <div class="cards">${lista.slice(0, limite).map(m => `<article class="card"><header><div><b>${esc(m.protocolo || "sem protocolo")}</b><div>${esc(m.nome)}</div></div><span class="selo ${classeSt(m.status)}">${esc(m.status)}</span></header>
+      <div class="meta">${esc(m.data)} · ${esc(m.cidade)} · ${esc(m.posto)}</div><div>${esc(m.material)} · qtd ${esc(m.quantidade)}</div>${m.observacao ? `<div class="meta">Obs.: ${esc(m.observacao)}</div>` : ""}
+      <div style="display:flex;gap:8px">${m.assinatura && m.assinatura.length > 20 ? `<img class="thumb" src="${esc(m.assinatura)}" alt="Assinatura" onclick="window.open(this.src)">` : ""}${m.foto && m.foto.length > 20 ? `<img class="thumb" src="${esc(m.foto)}" alt="Foto" onclick="window.open(this.src)">` : ""}</div>
+      <div class="acoes"><select style="width:auto;min-height:30px" onchange="statusMat(${m.id},this.value)"><option value="">Mudar status…</option>${ST_M.filter(s => s !== m.status).map(s => `<option>${s}</option>`).join("")}</select></div></article>`).join("") || `<div class="vazio">Nenhum pedido de material.</div>`}</div>
+    ${lista.length > limite ? `<button class="btn mais" onclick="limite+=60;render()">Mostrar mais</button>` : ""}`;
+}
+async function statusMat(id, status) {
+  if (!status) return;
+  try { const r = await api("statusMaterial", { id, status }); if (!r.sucesso) throw new Error(r.erro); const m = MAT.find(x => x.id === id); m.status = status; toast("Status: " + status); render(); }
+  catch (e) { toast(e.message, true); }
+}
+async function pdfMateriais(status) {
+  const l = MAT.filter(m => m.status === status), pdf = new window.jspdf.jsPDF(); const y = await cabecalhoPdf(pdf, "Materiais · " + status);
+  pdf.autoTable({ startY: y, head: [["Data","Protocolo","Nome","Cidade","Posto","Material","Qtd"]], body: l.map(m => [m.data, m.protocolo, m.nome, m.cidade, m.posto, m.material, m.quantidade]), theme: "grid", styles: { fontSize: 8 }, headStyles: { fillColor: [30,32,36] } });
+  rodapePdf(pdf); pdf.save(`materiais_${status.toLowerCase().replace(/\s+/g, "_")}.pdf`);
+  if (status === "ENTREGUE" && l.length && EU.perfil === "admin" && confirm(`PDF gerado com ${l.length} pedido(s) entregue(s).\n\nApagar esses registros da planilha? Esta ação não pode ser desfeita.`)) {
+    try { const r = await api("apagarMateriaisEntregues"); if (!r.sucesso) throw new Error(r.erro); toast(`${r.apagados} registro(s) apagado(s).`); MAT = null; render(); } catch (e) { toast(e.message, true); }
+  }
 }
 
-/* ── Apagar entregues da planilha (após confirmação) ── */
-async function apagarEntreguesDaPlanilha() {
-    toast("Apagando entregues...", "#555");
-    try {
-        const url = `${URL_SCRIPT}?func=apagarEntregues&tipo=${tipoAtual}`;
-        const res  = await fetch(url);
-        const json = await res.json();
-        if (json.sucesso) {
-            toast(`✓ ${json.apagados} registro(s) apagado(s)`, "#22c55e");
-            await carregar();
-        } else {
-            throw new Error(json.erro || "Erro desconhecido");
-        }
-    } catch (err) {
-        toast("Erro ao apagar: " + err.message, "#ef4444");
-    }
+/* ───────── USUÁRIOS ───────── */
+function vUsuarios() {
+  $("conteudo").innerHTML = `<h2 class="tit">Usuários</h2><p class="sub">Estoque opera pedidos, entregas e devoluções. Administrador também altera preços, faz ajustes, aprova valores e gerencia usuários.</p>
+    <div class="tabela"><table><thead><tr><th>Usuário</th><th>Nome</th><th>Perfil</th><th>Situação</th><th></th></tr></thead><tbody>${(D.usuarios || []).map(u => `<tr><td>${esc(u.usuario)}</td><td>${esc(u.nome)}</td>
+      <td>${u.perfil === "admin" ? "Administrador" : "Estoque"}</td><td>${u.ativo === "SIM" ? '<span class="selo ok">Ativo</span>' : '<span class="selo erro">Inativo</span>'}</td>
+      <td class="n"><button class="btn peq" onclick="modalSenha('${esc(u.usuario)}')">Trocar senha</button> <button class="btn peq" onclick="opUsuario('${esc(u.usuario)}','perfil','${u.perfil === "admin" ? "estoque" : "admin"}')">Tornar ${u.perfil === "admin" ? "estoque" : "administrador"}</button>
+        <button class="btn peq ${u.ativo === "SIM" ? "perigo" : ""}" onclick="opUsuario('${esc(u.usuario)}','${u.ativo === "SIM" ? "desativar" : "ativar"}')">${u.ativo === "SIM" ? "Desativar" : "Ativar"}</button></td></tr>`).join("")}</tbody></table></div>
+    <h3 class="sec">Novo usuário</h3>
+    <div class="barra"><label>Usuário<input id="nuU" placeholder="ex.: carlos.estoque"></label><label>Nome<input id="nuN"></label>
+      <label>Perfil<select id="nuP"><option value="estoque">Estoque</option><option value="admin">Administrador</option></select></label>
+      <label>Senha inicial<input id="nuS" type="password" autocomplete="new-password" placeholder="mínimo 8 caracteres"></label>
+      <div class="acoes"><button class="btn p" onclick="criarUsuario()">Criar usuário</button></div></div>`;
 }
+async function criarUsuario() { const r = await executar("usuarios", { op: "criar", usuario: $("nuU").value, nome: $("nuN").value, perfil: $("nuP").value, senha: $("nuS").value }, "Usuário criado."); }
+async function opUsuario(usuario, op, perfil) { await executar("usuarios", { op, usuario, perfil }, "Usuário atualizado."); }
+function modalSenha(usuario) {
+  modal(`<h3>Trocar senha</h3><p class="sub">${esc(usuario)}</p><label class="c">Nova senha<input id="mSenha" type="password" autocomplete="new-password"></label><div class="erro-m" id="mErro" hidden></div>
+    <div class="rodape"><button class="btn" onclick="fecharModal()">Cancelar</button><button class="btn p" onclick="trocarSenha('${esc(usuario)}')">Salvar</button></div>`);
+}
+async function trocarSenha(usuario) { const r = await executar("usuarios", { op: "senha", usuario, senha: $("mSenha").value }, "Senha alterada."); if (r.sucesso) fecharModal(); else erroModal(r.erro); }
 
-carregar();
+/* ───────── modal ───────── */
+function modal(html, largo) {
+  fecharModal();
+  const f = document.createElement("div"); f.className = "fundo"; f.id = "fundoModal";
+  f.innerHTML = `<div class="modal ${largo ? "largo" : ""}" role="dialog" aria-modal="true">${html}</div>`;
+  f.addEventListener("mousedown", e => { if (e.target === f) fecharModal(); });
+  document.body.appendChild(f);
+}
+function fecharModal() { const f = $("fundoModal"); if (f) f.remove(); }
+function erroModal(msg) { const e = $("mErro"); if (e) { e.textContent = msg; e.hidden = false; } else toast(msg, true); }
+document.addEventListener("keydown", e => { if (e.key === "Escape") fecharModal(); });
+
+if (TOKEN && EU) iniciar();
 </script>
 </body>
 </html>
