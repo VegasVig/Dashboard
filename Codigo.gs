@@ -498,6 +498,50 @@ function movimentarEstoque_(d, u) {
   });
 }
 
+/* ───────────── importação das peças do formulário ───────────── */
+// Mesmas peças dos kits de posto do formulário do funcionário.
+const KIT_PECAS = ["Apito","Baleiro","Blazer","Blusa cinza","Blusa de Frio","Blusa Preta","Blusa preta serviços","Blusa preta vigilância","Boné","Botina",
+  "Botom preto vigilante","Calça elástico cinza","Calça jeans","Calça social","Calça Tática","Calça vigilante tática","Camisa ASG","Camisa porteiro",
+  "Camisa Preta","Camisa social branca","Camisa social preta","Camisa vigilante bege curta","Camisa vigilante bege longa","Capa para placa balística",
+  "Casaco Preto","Casaco preto serviços","Casaco preto vigilância","Casaco vigilância","Cinto","Cinto tático","Cobertura/Boné","Coldre","Coturno","Fiel",
+  "Galocha","Gandola","Gandola Cinza","Gandola Preta","Gravata","Sapato social","Touca","Touca vegas vigilância"];
+
+// Mesma regra de tamanhos que o formulário antigo usava.
+function gradePadrao_(nome) {
+  const n = norm_(nome), faixa = (a, b, p) => { const o = []; for (let i = a; i <= b; i += p) o.push(String(i)); return o; };
+  if (/sapato|botina|coturno|galocha/.test(n)) return { cat: "Calçado", tam: faixa(34, 48, 1) };
+  if (/camisa social/.test(n)) return { cat: "Camisa", tam: ["N2","N3","N4","N5","N6","N7","N8"] };
+  if (/calca elastico/.test(n)) return { cat: "Calça", tam: ["P","M","G","GG","XG","EXG","EXGG"] };
+  if (/calca/.test(n)) return { cat: "Calça", tam: faixa(36, 60, 2) };
+  if (/camisa/.test(n)) return { cat: "Camisa", tam: ["P","M","G","GG","EG"] };
+  if (/blusa|casaco|gandola|blazer/.test(n)) return { cat: "Agasalho", tam: ["P","M","G","GG","EG"] };
+  return { cat: "Acessório", tam: ["Único"] };
+}
+
+// Cria saldo zerado para cada peça × tamanho que ainda não existe. Pode rodar de novo: não duplica.
+// Peças importadas só entram nos alertas depois da primeira movimentação.
+function importarPecasDosKits_(u) {
+  return comLock_(() => {
+    const t = tabela_("PECAS"), existe = {}, novas = [];
+    t.rows.forEach(p => existe[p.sku] = 1);
+    const vistos = {};
+    KIT_PECAS.forEach(nome => {
+      if (vistos[norm_(nome)]) return; vistos[norm_(nome)] = 1;
+      const g = gradePadrao_(nome);
+      g.tam.forEach(tam => {
+        const sku = slug_(nome) + "-" + slug_(tam);
+        if (existe[sku]) return; existe[sku] = 1;
+        novas.push({ sku, nome, categoria: g.cat, tamanho: tam, saldo: 0, reservado: 0, quarentena: 0, minimo: MINIMO_PADRAO, valorUnit: 0,
+          estado: "Nova", obs: "Importada do formulário de uniformes", ativo: "SIM", alertaAtivo: "", qtdInicial: 0, criadoEm: new Date(), atualizadoEm: new Date() });
+      });
+    });
+    inserir_(t, novas);
+    auditar_(u ? u.usuario : "editor", "importar_pecas_kits", novas.length);
+    return { sucesso: true, criadas: novas.length };
+  });
+}
+function importarPecasDosKits() { Logger.log(JSON.stringify(importarPecasDosKits_(null))); }
+
 /* ───────────── fluxo do pedido ───────────── */
 const PODE_IR = {};
 PODE_IR[ST.APROV] = [ST.SEPAR, ST.DISP];
@@ -745,6 +789,7 @@ const ACOES = {
   anexos:        { auth: true, fn: d => anexos_(d) },
   cadastrarPecas:{ auth: true, mut: true, fn: cadastrarPecas_ },
   editarPeca:    { auth: true, mut: true, fn: editarPeca_ },
+  importarKits:  { auth: true, mut: true, admin: true, fn: (d, u) => importarPecasDosKits_(u) },
   estoque:       { auth: true, mut: true, fn: movimentarEstoque_ },
   aprovar:       { auth: true, mut: true, fn: aprovar_ },
   status:        { auth: true, mut: true, fn: mudarStatus_ },
